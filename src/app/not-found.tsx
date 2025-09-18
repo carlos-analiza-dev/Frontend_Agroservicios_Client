@@ -1,7 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/providers/store/useAuthStore";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React from "react";
 
@@ -34,7 +33,7 @@ const PageNotFound = () => {
           onClick={handleNotFound}
           className="mt-6 inline-block px-6 py-3 text-white bg-blue-600 hover:bg-blue-700 rounded-2xl shadow-md transition"
         >
-          Volver al inicio
+          {cliente?.isActive && token ? "Volver" : "Volver al inicio"}
         </Button>
       </div>
     </div>

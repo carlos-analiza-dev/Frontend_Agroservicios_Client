@@ -30,6 +30,7 @@ import {
   Layers,
   Save,
   Navigation,
+  ArrowLeft,
 } from "lucide-react";
 
 import { TipoExplotacion } from "@/helpers/data/tipoExplotacion";
@@ -166,6 +167,16 @@ export default function CrearFincaPage() {
 
   return (
     <div className="min-h-screen bg-background p-4">
+      <div className="flex items-center justify-between mb-6">
+        <Button
+          variant="ghost"
+          onClick={() => router.push("/fincas")}
+          className="gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Volver
+        </Button>
+      </div>
       <Card className="max-w-4xl mx-auto">
         <CardHeader>
           <CardTitle className="text-2xl font-bold flex items-center gap-2">

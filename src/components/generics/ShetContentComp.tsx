@@ -1,16 +1,9 @@
 import React from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "../ui/sheet";
-
 import Link from "next/link";
 import { Separator } from "../ui/separator";
 import { LogOut } from "lucide-react";
 import { usePathname } from "next/navigation";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "../ui/accordion";
 import { navItems } from "@/helpers/data/sidebarData";
 
 interface Props {
@@ -36,59 +29,26 @@ const SheetContentComp = ({
             </SheetTitle>
           </div>
         </SheetHeader>
+
         <div className="flex flex-1 flex-col overflow-y-auto">
           <nav className="flex-1 space-y-1 px-4 py-4">
-            <Accordion type="multiple" className="w-full">
-              {navItems.map((category) => (
-                <AccordionItem
-                  key={category.category}
-                  value={category.category}
-                  className="border-b-0"
-                >
-                  {category.items.length > 1 ? (
-                    <>
-                      <AccordionTrigger className="px-4 py-3 text-sm font-medium text-gray-600 hover:no-underline hover:bg-gray-50 hover:text-gray-900 rounded-lg">
-                        <span className="flex items-center">
-                          {category.category}
-                        </span>
-                      </AccordionTrigger>
-                      <AccordionContent className="pb-0">
-                        <div className="space-y-1 pl-4">
-                          {category.items.map((item) => (
-                            <Link
-                              key={item.name}
-                              href={item.href}
-                              onClick={() => setMobileSidebarOpen(false)}
-                              className={`flex items-center rounded-lg px-4 py-3 text-sm font-medium transition-colors ${
-                                pathname === item.href
-                                  ? "bg-gray-100 text-gray-900"
-                                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                              }`}
-                            >
-                              <item.icon className="mr-3 h-5 w-5" />
-                              {item.name}
-                            </Link>
-                          ))}
-                        </div>
-                      </AccordionContent>
-                    </>
-                  ) : (
-                    <Link
-                      href={category.items[0].href}
-                      onClick={() => setMobileSidebarOpen(false)}
-                      className={`flex items-center rounded-lg px-4 py-3 text-sm font-medium transition-colors ${
-                        pathname === category.items[0].href
-                          ? "bg-gray-100 text-gray-900"
-                          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                      }`}
-                    >
-                      {category.items[0].name}
-                    </Link>
-                  )}
-                </AccordionItem>
-              ))}
-            </Accordion>
+            {navItems.map((item) => (
+              <Link
+                key={item.name}
+                href={item.href}
+                onClick={() => setMobileSidebarOpen(false)}
+                className={`flex items-center rounded-lg px-4 py-3 text-sm font-medium transition-colors ${
+                  pathname === item.href
+                    ? "bg-gray-100 text-gray-900"
+                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                }`}
+              >
+                <item.icon className="mr-3 h-5 w-5" />
+                {item.name}
+              </Link>
+            ))}
           </nav>
+
           <div className="p-4">
             <Separator className="my-4" />
             <button
