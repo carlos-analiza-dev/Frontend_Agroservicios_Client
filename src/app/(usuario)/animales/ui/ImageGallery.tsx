@@ -43,15 +43,13 @@ const ImageGallery = ({
         </div>
 
         <div className="flex-1 flex items-center justify-center relative">
-          <Image
+          <img
             src={images[currentIndex].url.replace(
               "localhost",
-              process.env.NEXT_PUBLIC_API || "192.168.0.10"
+              process.env.NEXT_PUBLIC_HOST || "192.168.0.10"
             )}
             alt={`Imagen ${currentIndex + 1}`}
-            width={800}
-            height={600}
-            className="object-contain max-h-full"
+            className="object-contain max-h-full max-w-full"
           />
           {onDelete && images[currentIndex].id && (
             <button

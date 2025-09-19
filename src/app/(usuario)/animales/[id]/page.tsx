@@ -21,29 +21,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
-
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { ArrowLeft, CalendarIcon, InfoIcon, PawPrintIcon } from "lucide-react";
-import { format } from "date-fns";
-import { es } from "date-fns/locale";
+import { ArrowLeft, InfoIcon, PawPrintIcon } from "lucide-react";
 import { useAuthStore } from "@/providers/store/useAuthStore";
 import {
   CrearAnimalByFinca,
   TipoComplemento,
 } from "@/api/animales/interfaces/crear-animal.interface";
 import useGetRazasByEspecie from "@/hooks/razas/useGetRazasByEspecie";
-import { CreateAnimal } from "@/api/animales/accions/crear-animal";
 import { toast } from "react-toastify";
 import { sexoOptions } from "@/helpers/data/sexo_animales";
 import { purezaOptions } from "@/helpers/data/purezaOptions";
@@ -52,9 +42,15 @@ import { alimentosOptions } from "@/helpers/data/alimentos";
 import { dataProduccion } from "@/helpers/data/dataProduccion";
 import { dataTipoProduccion } from "@/helpers/data/dataTipoProduccion";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import useAnimalById from "@/hooks/animales/useAnimalById";
+import { useParams } from "next/navigation";
+import { ActualizarAnimal } from "@/api/animales/accions/update-animal";
+import { extractNumberFromIdentifier } from "@/helpers/funciones/extractNumberFromIdentifier ";
 
-const CrearAnimalPage = () => {
+const AnimalDetailsPage = () => {
   const router = useRouter();
+  const params = useParams();
+  const animalId = params.id as string;
   const queryClient = useQueryClient();
   const { cliente } = useAuthStore();
   const [activeTab, setActiveTab] = useState("animal");
@@ -62,6 +58,20 @@ const CrearAnimalPage = () => {
   const [showIdentifierHelpPadre, setShowIdentifierHelpPadre] = useState(false);
   const [showIdentifierHelpMadre, setShowIdentifierHelpMadre] = useState(false);
   const [date, setDate] = useState<Date>();
+  const [tipoAlimentacion, setTipoAlimentacion] = useState<
+    {
+      alimento: string;
+      origen: string;
+      porcentaje_comprado?: number;
+      porcentaje_producido?: number;
+    }[]
+  >([]);
+  const [complementoSeleccionados, setComplementoSeleccionados] = useState<
+    string[]
+  >([]);
+
+  const { data: animalData, isLoading } = useAnimalById(animalId);
+  const animal = animalData?.data;
 
   const {
     register,
@@ -83,6 +93,66 @@ const CrearAnimalPage = () => {
       arete_madre: "",
     },
   });
+
+  useEffect(() => {
+    if (animalData?.data) {
+      const animal = animalData.data;
+
+      reset({
+        especie: animal?.especie?.id || "",
+        sexo: animal?.sexo || "",
+        color: animal?.color || "",
+        produccion: animal?.produccion || "",
+        tipo_produccion: animal?.tipo_produccion || "",
+        identificador_temp: extractNumberFromIdentifier(animal?.identificador),
+        identificador_temp_madre: extractNumberFromIdentifier(
+          animal?.arete_madre ?? ""
+        ),
+        identificador_temp_padre: extractNumberFromIdentifier(
+          animal?.arete_padre ?? ""
+        ),
+        identificador: animal?.identificador || "",
+        arete_madre: animal?.arete_madre || "",
+        arete_padre: animal?.arete_padre || "",
+        razaIds: animal?.razas?.map((raza) => raza.id) || [],
+        pureza: animal?.pureza,
+        edad_promedio: Number(animal?.edad_promedio) || 0,
+        fecha_nacimiento: animal?.fecha_nacimiento || "",
+        castrado: animal?.castrado || false,
+        esterelizado: animal?.esterelizado || false,
+        observaciones: animal?.observaciones || "",
+        fincaId: animal?.finca?.id || "",
+        propietarioId: animal?.propietario?.id || "",
+        medicamento: animal?.medicamento || "",
+        compra_animal: animal?.compra_animal,
+        nombre_criador_origen_animal: animal?.nombre_criador_origen_animal,
+        tipo_reproduccion: animal?.tipo_reproduccion || "",
+        tipo_alimentacion: animal?.tipo_alimentacion || "",
+        nombre_padre: animal?.nombre_padre || "",
+        razas_padre: animal?.razas_padre?.map((raza) => raza.id) || [],
+        pureza_padre: animal?.pureza_padre,
+        nombre_criador_padre: animal?.nombre_criador_padre || "",
+        nombre_propietario_padre: animal?.nombre_propietario_padre || "",
+        nombre_finca_origen_padre: animal?.nombre_finca_origen_padre || "",
+        nombre_madre: animal?.nombre_madre || "",
+        razas_madre: animal?.razas_madre?.map((raza) => raza.id) || [],
+        pureza_madre: animal?.pureza_madre,
+        nombre_criador_madre: animal?.nombre_criador_madre || "",
+        nombre_propietario_madre: animal?.nombre_propietario_madre || "",
+        nombre_finca_origen_madre: animal?.nombre_finca_origen_madre || "",
+        numero_parto_madre: animal?.numero_parto_madre || 0,
+      });
+
+      if (animal?.tipo_alimentacion) {
+        setTipoAlimentacion(animal.tipo_alimentacion);
+      }
+
+      if (animal?.complementos) {
+        const complementos = animal.complementos.map((c) => c.complemento);
+        setComplementoSeleccionados(complementos);
+      }
+    }
+  }, [animalData, reset]);
 
   const { data: especies } = useGetEspecies();
   const especieId = watch("especie");
@@ -262,11 +332,11 @@ const CrearAnimalPage = () => {
     })) || [];
 
   const mutation = useMutation({
-    mutationFn: (data: CrearAnimalByFinca) => CreateAnimal(data),
+    mutationFn: (data: CrearAnimalByFinca) => ActualizarAnimal(animalId, data),
     onSuccess: () => {
-      toast.success("Animal creado correctamente");
+      toast.success("Animal actualizado correctamente");
       queryClient.invalidateQueries({ queryKey: ["animales-propietario"] });
-      reset();
+      queryClient.invalidateQueries({ queryKey: ["animal-id", animalId] });
       router.push("/animales");
     },
     onError: (error) => {
@@ -276,7 +346,7 @@ const CrearAnimalPage = () => {
           ? messages[0]
           : typeof messages === "string"
             ? messages
-            : "Hubo un error al crear el animal";
+            : "Hubo un error al actualizar el animal";
 
         toast.error(errorMessage);
       } else {
@@ -323,8 +393,28 @@ const CrearAnimalPage = () => {
     mutation.mutate(animalData);
   };
 
+  if (isLoading) {
+    return (
+      <div className="container mx-auto p-4 max-w-4xl">
+        <div className="flex items-center justify-center h-64">
+          <p>Cargando datos del animal...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!animal) {
+    return (
+      <div className="container mx-auto p-4 max-w-4xl">
+        <div className="flex items-center justify-center h-64">
+          <p>No se encontró el animal</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="container mx-auto max-w-4xl">
+    <div className="container mx-auto p-4 max-w-4xl">
       <div className="flex items-center justify-between mb-6">
         <Button
           variant="ghost"
@@ -337,7 +427,7 @@ const CrearAnimalPage = () => {
       </div>
       <div className="flex items-center mb-6">
         <PawPrintIcon className="h-8 w-8 mr-2" />
-        <h1 className="text-3xl font-bold">Crear Nuevo Animal</h1>
+        <h1 className="text-3xl font-bold">Editar Animal</h1>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -357,7 +447,7 @@ const CrearAnimalPage = () => {
                 <div className="space-y-2">
                   <Label>Especie *</Label>
                   <Select
-                    value={watch("especie") || ""}
+                    defaultValue={animal ? animal.especie.id : watch("especie")}
                     onValueChange={(value) => setValue("especie", value)}
                   >
                     <SelectTrigger>
@@ -381,7 +471,7 @@ const CrearAnimalPage = () => {
                 <div className="space-y-2">
                   <Label>Sexo *</Label>
                   <Select
-                    value={watch("sexo") || ""}
+                    defaultValue={animal ? animal.sexo : watch("sexo")}
                     onValueChange={(value) => setValue("sexo", value)}
                   >
                     <SelectTrigger>
@@ -512,7 +602,7 @@ const CrearAnimalPage = () => {
                 <div className="space-y-2">
                   <Label>Nivel de Pureza</Label>
                   <Select
-                    value={watch("pureza") || ""}
+                    defaultValue={animal ? animal.pureza : watch("pureza")}
                     onValueChange={(value) => setValue("pureza", value)}
                   >
                     <SelectTrigger>
@@ -531,7 +621,11 @@ const CrearAnimalPage = () => {
                 <div className="space-y-2">
                   <Label>Tipo de Reproducción</Label>
                   <Select
-                    value={watch("tipo_reproduccion") || ""}
+                    defaultValue={
+                      animal
+                        ? animal.tipo_reproduccion
+                        : watch("tipo_reproduccion")
+                    }
                     onValueChange={(value) =>
                       setValue("tipo_reproduccion", value)
                     }
@@ -557,7 +651,9 @@ const CrearAnimalPage = () => {
                 <div className="space-y-2">
                   <Label>Producción</Label>
                   <Select
-                    value={watch("produccion") || ""}
+                    defaultValue={
+                      animal ? animal.produccion : watch("produccion")
+                    }
                     onValueChange={(value) => setValue("produccion", value)}
                   >
                     <SelectTrigger>
@@ -581,7 +677,9 @@ const CrearAnimalPage = () => {
                 <div className="space-y-2">
                   <Label>Tipo de Producción</Label>
                   <Select
-                    value={watch("tipo_produccion") || ""}
+                    defaultValue={
+                      animal ? animal.tipo_produccion : watch("tipo_produccion")
+                    }
                     onValueChange={(value) =>
                       setValue("tipo_produccion", value)
                     }
@@ -606,35 +704,17 @@ const CrearAnimalPage = () => {
 
                 <div className="space-y-2">
                   <Label>Fecha de Nacimiento</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className="w-full justify-start text-left font-normal"
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {date
-                          ? format(date, "PPP", { locale: es })
-                          : "Seleccionar fecha"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar
-                        mode="single"
-                        selected={date}
-                        onSelect={(selectedDate) => {
-                          setDate(selectedDate);
-                          if (selectedDate) {
-                            setValue(
-                              "fecha_nacimiento",
-                              format(selectedDate, "yyyy-MM-dd")
-                            );
-                          }
-                        }}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
+                  <Input
+                    type="date"
+                    value={watch("fecha_nacimiento") || ""}
+                    onChange={(e) => {
+                      const selectedDate = e.target.value;
+                      setValue("fecha_nacimiento", selectedDate, {
+                        shouldValidate: true,
+                      });
+                    }}
+                    className="w-full"
+                  />
                   {errors.fecha_nacimiento && (
                     <p className="text-sm text-red-500">
                       {errors.fecha_nacimiento.message}
@@ -912,7 +992,7 @@ const CrearAnimalPage = () => {
                 <div className="space-y-2">
                   <Label>Finca</Label>
                   <Select
-                    value={watch("fincaId") || ""}
+                    defaultValue={animal ? animal.finca.id : watch("fincaId")}
                     onValueChange={(value) => setValue("fincaId", value)}
                   >
                     <SelectTrigger>
@@ -952,16 +1032,23 @@ const CrearAnimalPage = () => {
                       placeholder="Nombre del criador"
                     />
                     {errors.nombre_criador_origen_animal && (
-                      <p className="text-sm text-red-500">
+                      <p className="text-sm text red-500">
                         {errors.nombre_criador_origen_animal.message}
                       </p>
                     )}
                   </div>
                 )}
 
-                <Button type="button" onClick={() => setActiveTab("padre")}>
-                  Siguiente: Datos del Padre
-                </Button>
+                <div className="flex gap-4">
+                  <Button type="submit" disabled={mutation.isPending}>
+                    {mutation.isPending
+                      ? "Actualizando..."
+                      : "Actualizar Animal"}
+                  </Button>
+                  <Button type="button" onClick={() => setActiveTab("padre")}>
+                    Siguiente: Datos del Padre
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -1086,7 +1173,9 @@ const CrearAnimalPage = () => {
                 <div className="space-y-2">
                   <Label>Nivel de Pureza del Padre</Label>
                   <Select
-                    value={watch("pureza_padre") || ""}
+                    defaultValue={
+                      animal ? animal.pureza_padre : watch("pureza_padre")
+                    }
                     onValueChange={(value) => setValue("pureza_padre", value)}
                   >
                     <SelectTrigger>
@@ -1153,6 +1242,11 @@ const CrearAnimalPage = () => {
                     onClick={() => setActiveTab("animal")}
                   >
                     Anterior
+                  </Button>
+                  <Button type="submit" disabled={mutation.isPending}>
+                    {mutation.isPending
+                      ? "Actualizando..."
+                      : "Actualizar Animal"}
                   </Button>
                   <Button type="button" onClick={() => setActiveTab("madre")}>
                     Siguiente: Datos de la Madre
@@ -1285,7 +1379,9 @@ const CrearAnimalPage = () => {
                 <div className="space-y-2">
                   <Label>Nivel de pureza</Label>
                   <Select
-                    value={watch("pureza_madre") || ""}
+                    defaultValue={
+                      animal ? animal.pureza_madre : watch("pureza_madre")
+                    }
                     onValueChange={(value) => setValue("pureza_madre", value)}
                   >
                     <SelectTrigger>
@@ -1388,7 +1484,9 @@ const CrearAnimalPage = () => {
                     Anterior
                   </Button>
                   <Button type="submit" disabled={mutation.isPending}>
-                    {mutation.isPending ? "Creando..." : "Crear Animal"}
+                    {mutation.isPending
+                      ? "Actualizando..."
+                      : "Actualizar Animal"}
                   </Button>
                 </div>
               </CardContent>
@@ -1400,4 +1498,4 @@ const CrearAnimalPage = () => {
   );
 };
 
-export default CrearAnimalPage;
+export default AnimalDetailsPage;

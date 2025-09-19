@@ -35,17 +35,11 @@ import { eliminarImagenAnimal } from "@/api/animales_profile/accions/delete-imag
 
 interface Props {
   animal: Animal;
-  onView: () => void;
   onEdit: () => void;
   onUpdateProfileImage: (imageUri: string, animalId: string) => Promise<void>;
 }
 
-const AnimalCard = ({
-  animal,
-  onView,
-  onEdit,
-  onUpdateProfileImage,
-}: Props) => {
+const AnimalCard = ({ animal, onEdit, onUpdateProfileImage }: Props) => {
   const [deathDialogVisible, setDeathDialogVisible] = useState(false);
   const [deathStatus, setDeathStatus] = useState(animal.animal_muerte);
   const [deathReason, setDeathReason] = useState(animal.razon_muerte);
@@ -127,7 +121,9 @@ const AnimalCard = ({
           : "Animal marcado como vivo"
       );
 
-      queryClient.invalidateQueries({ queryKey: ["animales-propietario"] });
+      queryClient.invalidateQueries({
+        queryKey: ["animales-propietario", animal.propietario.id],
+      });
       setDeathDialogVisible(false);
     } catch (error) {
       if (isAxiosError(error)) {
@@ -274,11 +270,10 @@ const AnimalCard = ({
             </>
           )}
 
-          <div className="flex justify-end space-x-2 mt-4">
-            <Button variant="outline" onClick={onEdit}>
+          <div className="flex justify-center w-full space-x-2 mt-4">
+            <Button className="w-full" variant="outline" onClick={onEdit}>
               Editar
             </Button>
-            <Button onClick={onView}>Ver Detalles</Button>
           </div>
         </CardContent>
       </Card>

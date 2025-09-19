@@ -50,7 +50,7 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-gray-50 overflow-hidden">
       <SidebarAdmin handleLogout={handleLogout} />
 
       <ShetContentComp
@@ -66,7 +66,7 @@ export default function AdminLayout({
         />
 
         <main className="flex-1 overflow-y-auto bg-gray-50 md:p-6">
-          {children}
+          <div className="h-full">{children}</div>
         </main>
       </div>
     </div>

@@ -2,12 +2,10 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 
 import useAnimalesByPropietario from "@/hooks/animales/useAnimalesByPropietario";
 import useGetEspecies from "@/hooks/especies/useGetEspecies";
-
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -16,16 +14,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Card, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Search, Plus, RefreshCw, AlertCircle } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { RefreshCw, AlertCircle } from "lucide-react";
 import { useAuthStore } from "@/providers/store/useAuthStore";
 import { useDebounce } from "@/hooks/debounce/useDebounce";
 import { useFincasPropietarios } from "@/hooks/fincas/useFincasPropietarios";
-import { Animal } from "@/api/animales/interfaces/response-animales.interface";
 import { Buscador } from "@/components/generics/Buscador";
 import { FAB } from "@/components/generics/FAB";
 import AnimalCard from "./ui/AnimalCard";
@@ -43,18 +35,21 @@ const AnimalesPageGanadero = () => {
   const { data: fincas } = useFincasPropietarios(cliente?.id ?? "");
   const { data: especies } = useGetEspecies();
 
+  const finca = fincaId === "all" ? "" : fincaId;
+  const especie = especieId === "all" ? "" : especieId;
+
   const {
     data,
-    isLoading,
     isError,
+    isLoading,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
     refetch,
   } = useAnimalesByPropietario(
     cliente?.id ?? "",
-    fincaId,
-    especieId,
+    finca,
+    especie,
     debouncedSearchTerm
   );
 
@@ -121,6 +116,7 @@ const AnimalesPageGanadero = () => {
             <SelectValue placeholder="Seleccionar finca" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="all">Todos</SelectItem>
             {fincas?.data?.fincas.map((finca) => (
               <SelectItem key={finca.id} value={finca.id}>
                 {finca.nombre_finca}
@@ -134,6 +130,7 @@ const AnimalesPageGanadero = () => {
             <SelectValue placeholder="Seleccionar especie" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="all">Todos</SelectItem>
             {especies?.data?.map((especie) => (
               <SelectItem key={especie.id} value={especie.id}>
                 {especie.nombre}
@@ -143,24 +140,7 @@ const AnimalesPageGanadero = () => {
         </Select>
       </div>
 
-      {isError && (
-        <Alert variant="destructive" className="mb-6">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>
-            No se pudieron cargar los animales. Por favor, intenta nuevamente.
-            <Button
-              variant="outline"
-              className="ml-4"
-              onClick={() => refetch()}
-            >
-              Reintentar
-            </Button>
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {animales.length === 0 && !isLoading ? (
+      {animales.length === 0 && !isLoading && isError ? (
         <div className="text-center py-12">
           <AlertCircle className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
           <h3 className="text-lg font-medium">No hay animales</h3>
@@ -177,8 +157,7 @@ const AnimalesPageGanadero = () => {
             <AnimalCard
               key={animal.id}
               animal={animal}
-              onEdit={() => router.push(`/animales/${animal.id}/editar`)}
-              onView={() => router.push(`/animales/${animal.id}`)}
+              onEdit={() => router.push(`/animales/${animal.id}`)}
               onUpdateProfileImage={handleUpdateProfileImage}
             />
           ))}
