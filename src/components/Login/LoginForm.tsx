@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { FullScreenLoader } from "../generics/FullScreenLoader";
 import { Eye, EyeOff } from "lucide-react";
 import { LoginInterface } from "@/interfaces/auth/login.interface";
+import { isAxiosError } from "axios";
 
 const LoginForm = () => {
   const router = useRouter();
@@ -62,21 +63,21 @@ const LoginForm = () => {
       }
 
       toast.success("¡Inicio de sesión exitoso!");
-      router.push("/fincas");
-    } catch (error: any) {
-      if (error.response?.status === 401) {
-        toast.error("Credenciales incorrectas");
-      } else if (error.response?.status === 403) {
-        toast.error("Usuario no autorizado");
-      } else if (error.response?.status === 404) {
-        toast.error("Usuario no encontrado");
-      } else if (error.code === "NETWORK_ERROR") {
-        toast.error("Error de conexión. Verifique su internet");
-      } else {
-        toast.error("Ocurrió un error durante el inicio de sesión");
+      router.push("/servicios");
+    } catch (error) {
+      if (isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          toast.error("Credenciales incorrectas");
+        } else if (error.response?.status === 403) {
+          toast.error("Usuario no autorizado");
+        } else if (error.response?.status === 404) {
+          toast.error("Usuario no encontrado");
+        } else if (error.code === "NETWORK_ERROR") {
+          toast.error("Error de conexión. Verifique su internet");
+        } else {
+          toast.error("Ocurrió un error durante el inicio de sesión");
+        }
       }
-
-      console.error("Error en login:", error);
     } finally {
       setIsPosting(false);
     }

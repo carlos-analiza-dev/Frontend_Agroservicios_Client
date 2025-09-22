@@ -27,7 +27,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { ArrowLeft, InfoIcon, PawPrintIcon } from "lucide-react";
+import { ArrowLeft, InfoIcon, PawPrintIcon, RefreshCw } from "lucide-react";
 import { useAuthStore } from "@/providers/store/useAuthStore";
 import {
   CrearAnimalByFinca,
@@ -395,9 +395,9 @@ const AnimalDetailsPage = () => {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto p-4 max-w-4xl">
-        <div className="flex items-center justify-center h-64">
-          <p>Cargando datos del animal...</p>
+      <div className="container mx-auto p-4">
+        <div className="flex justify-center items-center h-64">
+          <RefreshCw className="h-8 w-8 animate-spin" />
         </div>
       </div>
     );
