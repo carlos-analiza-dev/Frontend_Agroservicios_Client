@@ -23,6 +23,15 @@ export interface Pais {
   departamentos: Departamento[];
 }
 
+export interface ProfileImage {
+  id: string;
+  url: string;
+  key: string;
+  mimeType: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface Cliente {
   id: string;
   email: string;
@@ -36,6 +45,7 @@ export interface Cliente {
   pais: Pais;
   departamento: Departamento;
   municipio: Municipio;
+  profileImages: ProfileImage[];
 }
 
 export type ClienteUpdateData = {

@@ -30,8 +30,8 @@ import ReproductiveStatus from "./ReproductiveStatus";
 import AnimalParentInfo from "./AnimalParentInfo";
 import AnimalFincaByPropietarion from "./AnimalFincaByPropietarion";
 import AnimalProductionInfo from "./AnimalProductionInfo";
-import ImageGallery from "./ImageGallery";
 import { eliminarImagenAnimal } from "@/api/animales_profile/accions/delete-image-animal";
+import ImageGallery from "@/components/generics/ImageGallery";
 
 interface Props {
   animal: Animal;
