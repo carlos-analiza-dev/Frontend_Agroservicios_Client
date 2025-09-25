@@ -17,8 +17,15 @@ import { useParams } from "next/navigation";
 import Image from "next/image";
 import { useAuthStore } from "@/providers/store/useAuthStore";
 import useGetProductoById from "@/hooks/productos/useGetProductoById";
-import { toast } from "react-toastify";
 import { MessageError } from "@/components/generics/MessageError";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+  type CarouselApi,
+} from "@/components/ui/carousel";
 
 const ProductDetailsPage = () => {
   const { id: productoId } = useParams();
@@ -31,7 +38,6 @@ const ProductDetailsPage = () => {
     refetch,
   } = useGetProductoById(productoId as string);
 
-  // Función para obtener el precio seguro
   const getPrecio = () => {
     if (!producto?.preciosPorPais || producto.preciosPorPais.length === 0) {
       return "0.00";
@@ -39,7 +45,6 @@ const ProductDetailsPage = () => {
     return producto.preciosPorPais[0].precio || "0.00";
   };
 
-  // Función para obtener la cantidad disponible segura
   const getCantidadDisponible = () => {
     return 0;
   };
@@ -47,6 +52,27 @@ const ProductDetailsPage = () => {
   const [quantity, setQuantity] = useState(1);
   const [totalPrecio, setTotalPrecio] = useState(0);
   const [notas, setNotas] = useState("");
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [carouselApi, setCarouselApi] = useState<CarouselApi>();
+
+  useEffect(() => {
+    if (carouselApi && selectedImageIndex !== undefined) {
+      carouselApi.scrollTo(selectedImageIndex);
+    }
+  }, [selectedImageIndex, carouselApi]);
+
+  useEffect(() => {
+    if (!carouselApi) return;
+
+    const handleSelect = () => {
+      setSelectedImageIndex(carouselApi.selectedScrollSnap());
+    };
+
+    carouselApi.on("select", handleSelect);
+    return () => {
+      carouselApi.off("select", handleSelect);
+    };
+  }, [carouselApi]);
 
   const handleIncrease = () => {
     const cantidadDisponible = getCantidadDisponible();
@@ -65,39 +91,22 @@ const ProductDetailsPage = () => {
     await refetch();
   }, [refetch]);
 
-  /*   const handleAddToCart = () => {
-    if (!producto) {
-      toast.error("No se pudo obtener la información del producto");
-      return;
+  const getImagenes = () => {
+    if (producto?.imagenes && producto.imagenes.length > 0) {
+      return producto.imagenes;
     }
 
-    const existingItem = cartItems.find(
-      (item) => item.productoId === producto.id && !item.fincaId
-    );
-
-    addItem(
+    return [
       {
-        productoId: producto.id,
-        nombre: producto.nombre,
-        precio: Number(getPrecio()),
-        notas: notas,
-        imagen:
-          "https://static.wikia.nocookie.net/marketingandbusinessbyjd/images/a/a9/Producto_wikia.png/revision/latest?cb=20181002144352&path-prefix=es",
-        unidad_venta: producto.unidad_venta,
+        id: "default",
+        url: "https://static.wikia.nocookie.net/marketingandbusinessbyjd/images/a/a9/Producto_wikia.png/revision/latest?cb=20181002144352&path-prefix=es",
+        key: "default",
+        mimeType: "image/jpeg",
       },
-      quantity
-    );
+    ];
+  };
 
-    toast(
-      existingItem
-        ? `${quantity} ${producto.nombre} agregados a la cantidad existente`
-        : `${quantity} ${producto.nombre} agregado al carrito`
-    );
-
-    setQuantity(1);
-    setTotalPrecio(0);
-    setNotas("");
-  }; */
+  const imagenes = getImagenes();
 
   useEffect(() => {
     const precio = getPrecio();
@@ -133,20 +142,78 @@ const ProductDetailsPage = () => {
     <div className="container mx-auto px-4 py-6 max-w-6xl">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <Card className="overflow-hidden">
-          <div className="relative aspect-square">
-            <Image
-              src="https://static.wikia.nocookie.net/marketingandbusinessbyjd/images/a/a9/Producto_wikia.png/revision/latest?cb=20181002144352&path-prefix=es"
-              alt={producto.nombre || "Producto"}
-              fill
-              className="object-contain"
-            />
+          <div className="p-4">
+            <Carousel className="w-full" setApi={setCarouselApi}>
+              <CarouselContent>
+                {imagenes.map((imagen, index) => (
+                  <CarouselItem key={imagen.id}>
+                    <div className="relative aspect-square rounded-lg overflow-hidden">
+                      <Image
+                        src={imagen.url}
+                        alt={`${producto.nombre} - Imagen ${index + 1}`}
+                        fill
+                        className="object-contain"
+                        priority={index === 0}
+                      />
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+
+              {imagenes.length > 1 && (
+                <>
+                  <CarouselPrevious className="left-2" />
+                  <CarouselNext className="right-2" />
+                </>
+              )}
+            </Carousel>
+
+            {imagenes.length > 1 && (
+              <div className="mt-4">
+                <Carousel
+                  className="w-full"
+                  opts={{
+                    align: "start",
+                    dragFree: true,
+                  }}
+                >
+                  <CarouselContent>
+                    {imagenes.map((imagen, index) => (
+                      <CarouselItem
+                        key={imagen.id}
+                        className="basis-1/3 md:basis-1/4 lg:basis-1/5"
+                      >
+                        <div
+                          className={`relative aspect-square rounded-md overflow-hidden cursor-pointer border-2 ${
+                            selectedImageIndex === index
+                              ? "border-primary"
+                              : "border-transparent"
+                          }`}
+                          onClick={() => setSelectedImageIndex(index)}
+                        >
+                          <Image
+                            src={imagen.url}
+                            alt={`${producto.nombre} - Miniatura ${index + 1}`}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                      </CarouselItem>
+                    ))}
+                  </CarouselContent>
+
+                  <CarouselPrevious className="left-0 scale-75" />
+                  <CarouselNext className="right-0 scale-75" />
+                </Carousel>
+              </div>
+            )}
           </div>
         </Card>
 
         <div className="space-y-6">
           <div>
             <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-              {producto.nombre || "Nombre no disponible"}
+              {producto.nombre}
             </h1>
             <p className="text-lg text-gray-600 leading-relaxed">
               {producto.descripcion || "Sin descripción disponible"}
