@@ -11,9 +11,11 @@ import {
   ShoppingCart,
   AlertCircle,
   CheckCircle2,
+  ArrowLeft,
+  Store,
 } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { useAuthStore } from "@/providers/store/useAuthStore";
 import useGetProductoById from "@/hooks/productos/useGetProductoById";
@@ -26,17 +28,56 @@ import {
   CarouselPrevious,
   type CarouselApi,
 } from "@/components/ui/carousel";
+import useGetSucursalesPais from "@/hooks/sucursales/useGetSucursalesPais";
+import useGetExistenciaProductoBySucursal from "@/hooks/productos/useGetExistenciaProductoBySucursal";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
+import ProductosRelacionados from "../ui/ProductosRelacionados";
+import { useFavoritos } from "@/hooks/favoritos/useFavoritos";
 
 const ProductDetailsPage = () => {
   const { id: productoId } = useParams();
+  const { esFavorito, toggleFavorito } = useFavoritos();
+  const router = useRouter();
   const { cliente } = useAuthStore();
+  const paisId = cliente?.pais.id || "";
+
+  const {
+    data: sucursales,
+    isLoading: isLoadingSucursales,
+    isError: isErrorSucursales,
+  } = useGetSucursalesPais(paisId);
+
+  const [sucursalId, setSucursalId] = useState<string>("");
+
+  const {
+    data: existencia,
+    isLoading: isLoadingExistencia,
+    isError: isErrorExistencia,
+    refetch: refetchExistencia,
+  } = useGetExistenciaProductoBySucursal(productoId as string, sucursalId);
 
   const {
     data: producto,
-    isError,
-    isLoading,
-    refetch,
+    isError: isErrorProducto,
+    isLoading: isLoadingProducto,
+    refetch: refetchProducto,
   } = useGetProductoById(productoId as string);
+
+  const isFavorite = producto ? esFavorito(producto.id) : false;
+
+  useEffect(() => {
+    if (sucursales && sucursales.length > 0 && !sucursalId) {
+      setSucursalId(sucursales[0].id);
+    }
+  }, [sucursales, sucursalId]);
 
   const getPrecio = () => {
     if (!producto?.preciosPorPais || producto.preciosPorPais.length === 0) {
@@ -46,7 +87,14 @@ const ProductDetailsPage = () => {
   };
 
   const getCantidadDisponible = () => {
-    return 0;
+    if (!existencia || !sucursalId) return 0;
+    return existencia || 0;
+  };
+
+  const getNombreSucursalSeleccionada = () => {
+    if (!sucursales || !sucursalId) return "";
+    const sucursal = sucursales.find((s) => s.id === sucursalId);
+    return sucursal?.nombre || "";
   };
 
   const [quantity, setQuantity] = useState(1);
@@ -54,6 +102,12 @@ const ProductDetailsPage = () => {
   const [notas, setNotas] = useState("");
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [carouselApi, setCarouselApi] = useState<CarouselApi>();
+
+  const handleToggleFavorite = () => {
+    if (producto) {
+      toggleFavorito(producto);
+    }
+  };
 
   useEffect(() => {
     if (carouselApi && selectedImageIndex !== undefined) {
@@ -88,8 +142,16 @@ const ProductDetailsPage = () => {
   };
 
   const onRefresh = useCallback(async () => {
-    await refetch();
-  }, [refetch]);
+    await refetchProducto();
+    if (sucursalId) {
+      await refetchExistencia();
+    }
+  }, [refetchProducto, refetchExistencia, sucursalId]);
+
+  const handleSucursalChange = (value: string) => {
+    setSucursalId(value);
+    setQuantity(1);
+  };
 
   const getImagenes = () => {
     if (producto?.imagenes && producto.imagenes.length > 0) {
@@ -99,7 +161,7 @@ const ProductDetailsPage = () => {
     return [
       {
         id: "default",
-        url: "https://static.wikia.nocookie.net/marketingandbusinessbyjd/images/a/a9/Producto_wikia.png/revision/latest?cb=20181002144352&path-prefix=es",
+        url: "/images/ProductNF.png",
         key: "default",
         mimeType: "image/jpeg",
       },
@@ -114,7 +176,19 @@ const ProductDetailsPage = () => {
     setTotalPrecio(total);
   }, [quantity, producto]);
 
-  if (isLoading) {
+  if (isErrorSucursales || isErrorProducto) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <MessageError
+          titulo="Error al cargar la información"
+          descripcion="Ocurrió un error al cargar los datos del producto o sucursales"
+          onPress={onRefresh}
+        />
+      </div>
+    );
+  }
+
+  if (isLoadingProducto) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -122,24 +196,35 @@ const ProductDetailsPage = () => {
     );
   }
 
-  if (isError || !producto) {
+  if (!producto) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <MessageError
           titulo="No se encontró el producto seleccionado"
-          descripcion="Ocurrió un error al momento de cargar el producto"
+          descripcion="El producto que buscas no está disponible"
           onPress={onRefresh}
         />
       </div>
     );
   }
 
-  const isAvailable = producto.disponible;
+  const isAvailable = producto.disponible && getCantidadDisponible() > 0;
   const cantidadDisponible = getCantidadDisponible();
   const precio = getPrecio();
+  const nombreSucursal = getNombreSucursalSeleccionada();
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-6xl">
+      <div className="flex items-center justify-between mb-6">
+        <Button
+          variant="ghost"
+          onClick={() => router.push("/productos")}
+          className="gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Productos
+        </Button>
+      </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <Card className="overflow-hidden">
           <div className="p-4">
@@ -220,6 +305,80 @@ const ProductDetailsPage = () => {
             </p>
           </div>
 
+          <Card>
+            <CardContent className="p-4 space-y-4">
+              <div className="flex items-center gap-2">
+                <Store className="h-5 w-5 text-gray-600" />
+                <Label htmlFor="sucursal" className="text-lg font-semibold">
+                  Seleccionar sucursal
+                </Label>
+              </div>
+
+              {isLoadingSucursales ? (
+                <Skeleton className="h-10 w-full" />
+              ) : (
+                <Select
+                  value={sucursalId}
+                  onValueChange={handleSucursalChange}
+                  disabled={isLoadingSucursales || !sucursales?.length}
+                >
+                  <SelectTrigger>
+                    <SelectValue
+                      placeholder={
+                        isLoadingSucursales
+                          ? "Cargando sucursales..."
+                          : !sucursales?.length
+                            ? "No hay sucursales disponibles"
+                            : "Selecciona una sucursal"
+                      }
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {sucursales?.map((sucursal) => (
+                      <SelectItem key={sucursal.id} value={sucursal.id}>
+                        {sucursal.nombre}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+
+              {sucursalId && (
+                <div className="flex items-center justify-between pt-2">
+                  {isLoadingExistencia ? (
+                    <div className="flex items-center gap-2">
+                      <Skeleton className="h-4 w-4 rounded-full" />
+                      <Skeleton className="h-4 w-32" />
+                    </div>
+                  ) : isErrorExistencia ? (
+                    <Badge variant="destructive" className="text-sm">
+                      <AlertCircle className="w-3 h-3 mr-1" />
+                      Error al cargar existencia
+                    </Badge>
+                  ) : (
+                    <>
+                      <span className="text-sm text-gray-600">
+                        Disponible en {nombreSucursal}:
+                      </span>
+                      <Badge
+                        variant={isAvailable ? "default" : "destructive"}
+                        className="text-sm"
+                      >
+                        {isAvailable ? (
+                          <CheckCircle2 className="w-3 h-3 mr-1" />
+                        ) : (
+                          <AlertCircle className="w-3 h-3 mr-1" />
+                        )}
+                        {cantidadDisponible} {producto.unidad_venta || "unidad"}{" "}
+                        (as)
+                      </Badge>
+                    </>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           <div className="flex items-center justify-between">
             <span className="text-4xl font-bold text-green-600">
               {cliente?.pais?.simbolo_moneda || "$"}
@@ -251,7 +410,7 @@ const ProductDetailsPage = () => {
                   variant="outline"
                   size="icon"
                   onClick={handleDecrease}
-                  disabled={quantity <= 1}
+                  disabled={quantity <= 1 || !sucursalId}
                   className="h-10 w-10"
                 >
                   <Minus className="h-4 w-4" />
@@ -265,7 +424,11 @@ const ProductDetailsPage = () => {
                   variant="outline"
                   size="icon"
                   onClick={handleIncrease}
-                  disabled={!isAvailable || quantity >= cantidadDisponible}
+                  disabled={
+                    !isAvailable ||
+                    quantity >= cantidadDisponible ||
+                    !sucursalId
+                  }
                   className="h-10 w-10"
                 >
                   <Plus className="h-4 w-4" />
@@ -305,19 +468,30 @@ const ProductDetailsPage = () => {
                 <Button
                   variant="outline"
                   size="icon"
-                  className="flex-1 max-w-[60px]"
+                  className={`flex-1 max-w-[60px] transition-all duration-300 ${
+                    isFavorite
+                      ? "bg-red-50 border-red-200 text-red-600 hover:bg-red-100"
+                      : "hover:bg-red-50 hover:text-red-600"
+                  }`}
+                  onClick={handleToggleFavorite}
+                  title={
+                    isFavorite ? "Remover de favoritos" : "Agregar a favoritos"
+                  }
                 >
-                  <Heart className="h-5 w-5" />
+                  <Heart
+                    className={`h-5 w-5 ${isFavorite ? "fill-current" : ""}`}
+                  />
                 </Button>
 
                 <Button
-                  /* onClick={handleAddToCart} */
-                  disabled={!isAvailable}
+                  disabled={!isAvailable || !sucursalId}
                   className="flex-1"
                   size="lg"
                 >
                   <ShoppingCart className="h-5 w-5 mr-2" />
-                  Agregar al carrito
+                  {!sucursalId
+                    ? "Selecciona una sucursal"
+                    : "Agregar al carrito"}
                 </Button>
               </div>
             </CardContent>
@@ -335,21 +509,48 @@ const ProductDetailsPage = () => {
                 </span>
               </div>
               <div className="flex justify-between">
+                <span className="text-gray-600">Sucursal seleccionada:</span>
+                <span className="font-semibold">
+                  {nombreSucursal || "No seleccionada"}
+                </span>
+              </div>
+              <div className="flex justify-between">
                 <span className="text-gray-600">Cantidad disponible:</span>
                 <span className="font-semibold">
-                  {cantidadDisponible} {producto.unidad_venta || "unidad"}
+                  {sucursalId
+                    ? isLoadingExistencia
+                      ? "Cargando..."
+                      : `${cantidadDisponible} ${producto.unidad_venta || "unidad"}  (as)`
+                    : "Selecciona una sucursal"}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Estado:</span>
                 <Badge variant={isAvailable ? "default" : "destructive"}>
-                  {isAvailable ? "Disponible" : "Agotado"}
+                  {!sucursalId
+                    ? "Selecciona sucursal"
+                    : isAvailable
+                      ? "Disponible"
+                      : "Agotado"}
+                </Badge>
+              </div>
+
+              <div className="flex justify-between">
+                <span className="text-gray-600">En favoritos:</span>
+                <Badge variant={isFavorite ? "default" : "outline"}>
+                  {isFavorite ? "Sí" : "No"}
                 </Badge>
               </div>
             </CardContent>
           </Card>
         </div>
       </div>
+
+      <ProductosRelacionados
+        categoriaId={producto.categoria.id}
+        producto={producto.id}
+        tipo={producto.categoria.tipo}
+      />
     </div>
   );
 };

@@ -14,6 +14,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { Producto } from "@/api/productos/interfaces/response-productos-disponibles.interface";
 import { Cliente } from "@/interfaces/auth/cliente";
+import { useFavoritos } from "@/hooks/favoritos/useFavoritos";
 
 interface Props {
   producto: Producto;
@@ -23,24 +24,20 @@ interface Props {
 }
 
 const ProductCard = ({ producto, user, onPress, className = "" }: Props) => {
-  const [isFavorite, setIsFavorite] = useState(false);
+  const { esFavorito, toggleFavorito } = useFavoritos();
+
+  const isFavorite = esFavorito(producto.id);
   const precioPrincipal = producto.preciosPorPais?.[0]?.precio || "0.00";
   const simboloMoneda = user?.pais.simbolo_moneda || "L.";
   const tieneImagenes = producto.imagenes && producto.imagenes.length > 0;
 
   const handleFavorite = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setIsFavorite(!isFavorite);
-
-    console.log(
-      `${isFavorite ? "Remover de" : "Agregar a"} favoritos:`,
-      producto.id
-    );
+    toggleFavorito(producto);
   };
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation();
-
     console.log("Agregar al carrito:", producto.id);
   };
 
@@ -107,24 +104,11 @@ const ProductCard = ({ producto, user, onPress, className = "" }: Props) => {
           </p>
         )}
 
-        <p
-          className="text-sm text-muted-foreground line-clamp-2 leading-relaxed min-h-[2.5rem]"
-          title={producto.descripcion}
-        >
-          {producto.descripcion || "Producto de calidad premium"}
-        </p>
-
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <span className="text-2xl font-bold text-primary block">
               {simboloMoneda} {parseFloat(precioPrincipal).toFixed(2)}
             </span>
-            {producto.preciosPorPais?.[0]?.costo && (
-              <span className="text-xs text-muted-foreground line-through">
-                {simboloMoneda}{" "}
-                {parseFloat(producto.preciosPorPais[0].costo).toFixed(2)}
-              </span>
-            )}
           </div>
         </div>
       </CardContent>

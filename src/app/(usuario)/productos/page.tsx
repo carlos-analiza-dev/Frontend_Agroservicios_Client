@@ -96,7 +96,7 @@ const ProductosPage = () => {
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold mb-2">Productos Disponibles</h1>
           <p className="text-muted-foreground">
-            Descubre nuestra amplia gama de productos veterinarios
+            Descubre nuestra amplia gama de productos
           </p>
         </div>
 

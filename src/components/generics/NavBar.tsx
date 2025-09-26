@@ -1,6 +1,6 @@
 import React from "react";
 import { Button } from "../ui/button";
-import { LogOut, Menu, User } from "lucide-react";
+import { Heart, LogOut, Menu, User } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -11,9 +11,10 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useAuthStore } from "@/providers/store/useAuthStore";
 import { navItems } from "@/helpers/data/sidebarData";
+import { useFavoritos } from "@/hooks/favoritos/useFavoritos";
 
 interface Props {
   setMobileSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -22,6 +23,8 @@ interface Props {
 
 const NavBar = ({ handleLogout, setMobileSidebarOpen }: Props) => {
   const { cliente } = useAuthStore();
+  const { cantidadFavoritos } = useFavoritos();
+  const rounter = useRouter();
   const pathname = usePathname();
 
   const activePage =
@@ -42,6 +45,18 @@ const NavBar = ({ handleLogout, setMobileSidebarOpen }: Props) => {
       </div>
 
       <div className="flex items-center space-x-4">
+        <Button
+          onClick={() => rounter.push("/favoritos")}
+          variant="ghost"
+          className="relative h-8 w-8 rounded-full"
+        >
+          {cantidadFavoritos > 0 ? (
+            <Heart className="text-red-500" fill="currentColor" />
+          ) : (
+            <Heart />
+          )}
+        </Button>
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-8 w-8 rounded-full">

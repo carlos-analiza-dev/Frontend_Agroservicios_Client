@@ -29,7 +29,7 @@ export interface Producto {
   updatedAt: Date;
   categoriaId: string;
   preciosPorPais: PreciosPorPai[];
-  marca: Categoria;
+  marca: Marca;
   proveedor: Proveedor;
   categoria: Categoria;
   tax: Tax;
@@ -37,6 +37,17 @@ export interface Producto {
 }
 
 export interface Categoria {
+  id: string;
+  nombre: string;
+  descripcion?: string;
+  tipo: string;
+  is_active: boolean;
+  created_at: Date;
+  updated_at: Date;
+  pais_origen?: string;
+}
+
+export interface Marca {
   id: string;
   nombre: string;
   descripcion?: string;
