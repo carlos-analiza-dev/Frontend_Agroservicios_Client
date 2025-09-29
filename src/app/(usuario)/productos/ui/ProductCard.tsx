@@ -10,8 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Heart, Plus, Eye, ShoppingCart } from "lucide-react";
 import Image from "next/image";
-
-import { useState } from "react";
 import { Producto } from "@/api/productos/interfaces/response-productos-disponibles.interface";
 import { Cliente } from "@/interfaces/auth/cliente";
 import { useFavoritos } from "@/hooks/favoritos/useFavoritos";
@@ -34,11 +32,6 @@ const ProductCard = ({ producto, user, onPress, className = "" }: Props) => {
   const handleFavorite = (e: React.MouseEvent) => {
     e.stopPropagation();
     toggleFavorito(producto);
-  };
-
-  const handleAddToCart = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    console.log("Agregar al carrito:", producto.id);
   };
 
   const handleViewDetails = (e: React.MouseEvent) => {

@@ -1,5 +1,5 @@
+import { ResponseCitasPendientesMedicosInterface } from "@/api/medicos/interfaces/obtener-citas-medicos.interface";
 import { veterinariaAPI } from "@/helpers/api/veterinariaAPI";
-import { ResponseCitasPendientesMedicosInterface } from "@/core/medicos/interfaces/obtener-citas-medicos.interface";
 
 export const ObtenerCitasPendientesByMedico = async (
   id: string,

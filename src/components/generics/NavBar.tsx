@@ -1,6 +1,6 @@
 import React from "react";
 import { Button } from "../ui/button";
-import { Heart, LogOut, Menu, User } from "lucide-react";
+import { Heart, LogOut, Menu, ShoppingCart, User } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -15,6 +15,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useAuthStore } from "@/providers/store/useAuthStore";
 import { navItems } from "@/helpers/data/sidebarData";
 import { useFavoritos } from "@/hooks/favoritos/useFavoritos";
+import { useCartStore } from "@/providers/store/useCartStore";
 
 interface Props {
   setMobileSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -24,8 +25,11 @@ interface Props {
 const NavBar = ({ handleLogout, setMobileSidebarOpen }: Props) => {
   const { cliente } = useAuthStore();
   const { cantidadFavoritos } = useFavoritos();
-  const rounter = useRouter();
+  const { totalItems } = useCartStore();
+  const router = useRouter();
   const pathname = usePathname();
+
+  const cantidadCarrito = totalItems();
 
   const activePage =
     navItems.find((item) => item.href === pathname)?.name || "";
@@ -46,14 +50,33 @@ const NavBar = ({ handleLogout, setMobileSidebarOpen }: Props) => {
 
       <div className="flex items-center space-x-4">
         <Button
-          onClick={() => rounter.push("/favoritos")}
+          onClick={() => router.push("/favoritos")}
           variant="ghost"
           className="relative h-8 w-8 rounded-full"
+          title="Favoritos"
         >
           {cantidadFavoritos > 0 ? (
             <Heart className="text-red-500" fill="currentColor" />
           ) : (
             <Heart />
+          )}
+        </Button>
+
+        <Button
+          onClick={() => router.push("/cart")}
+          variant="ghost"
+          className="relative h-8 w-8 rounded-full"
+          title="Carrito"
+        >
+          {cantidadCarrito > 0 ? (
+            <>
+              <ShoppingCart className="text-blue-600" />
+              <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-blue-600 text-xs text-white">
+                {cantidadCarrito}
+              </span>
+            </>
+          ) : (
+            <ShoppingCart />
           )}
         </Button>
 

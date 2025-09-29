@@ -7,6 +7,8 @@ import SidebarAdmin from "@/components/generics/SidebarAdmin";
 import ShetContentComp from "@/components/generics/ShetContentComp";
 import NavBar from "@/components/generics/NavBar";
 import { FullScreenLoader } from "@/components/generics/FullScreenLoader";
+import { useFavoritos } from "@/hooks/favoritos/useFavoritos";
+import { useCartStore } from "@/providers/store/useCartStore";
 
 export default function AdminLayout({
   children,
@@ -14,6 +16,8 @@ export default function AdminLayout({
   children: React.ReactNode;
 }>) {
   const { logout, cliente } = useAuthStore();
+  const { limpiarFavoritos } = useFavoritos();
+  const { clearCart } = useCartStore();
   const router = useRouter();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -24,6 +28,8 @@ export default function AdminLayout({
       setLoading(true);
 
       await logout();
+      limpiarFavoritos();
+      clearCart();
       router.push("/");
 
       toast.success("Sesión cerrada correctamente");

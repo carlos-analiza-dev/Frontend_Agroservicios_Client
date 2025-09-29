@@ -3,7 +3,7 @@
 import useGetProductosDisponibles from "@/hooks/productos/useGetProductosDisponibles";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { RefreshCw, ShoppingCart } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -14,6 +14,7 @@ import ProductCard from "./ui/ProductCard";
 const ProductosPage = () => {
   const { cliente } = useAuthStore();
   const router = useRouter();
+  const [tipoCategoria, setTipoCategoria] = useState("");
 
   const {
     data: productosData,
@@ -23,7 +24,7 @@ const ProductosPage = () => {
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage,
-  } = useGetProductosDisponibles();
+  } = useGetProductosDisponibles(10, tipoCategoria);
 
   const todosLosProductos = useMemo(() => {
     return productosData?.pages.flatMap((page) => page.productos) || [];
@@ -98,6 +99,32 @@ const ProductosPage = () => {
           <p className="text-muted-foreground">
             Descubre nuestra amplia gama de productos
           </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 p-5">
+          <Button
+            variant="outline"
+            className={tipoCategoria === "" ? "border-blue-500" : ""}
+            onClick={() => setTipoCategoria("")}
+          >
+            Todos
+          </Button>
+
+          <Button
+            variant="outline"
+            className={tipoCategoria === "Ganaderia" ? "border-blue-500" : ""}
+            onClick={() => setTipoCategoria("Ganaderia")}
+          >
+            Ganadería
+          </Button>
+
+          <Button
+            variant="outline"
+            className={tipoCategoria === "Agricultura" ? "border-blue-500" : ""}
+            onClick={() => setTipoCategoria("Agricultura")}
+          >
+            Agricultura
+          </Button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

@@ -1,5 +1,4 @@
-import { Producto } from "@/api/productos/interfaces/response-productos-disponibles.interface";
-import { useFavoritosStore } from "@/providers/store/useFavoritosStore ";
+import { useFavoritosStore } from "@/providers/store/useFavoritosStore";
 
 export const useFavoritos = () => {
   const {

@@ -1,5 +1,3 @@
-import { TipoProduccionGanadera } from "@/core/produccion/interface/crear-produccion-finca.interface";
-
 export const meses = [
   "Enero",
   "Febrero",
@@ -15,7 +13,6 @@ export const meses = [
   "Diciembre",
 ];
 
-export const tiposProduccion = Object.values(TipoProduccionGanadera);
 export const tiposCultivo = [
   "Maíz",
   "Frijol",
