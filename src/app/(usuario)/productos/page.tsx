@@ -32,6 +32,7 @@ const ProductosPage = () => {
 
   const onRefresh = useCallback(async () => {
     await refetch();
+    setTipoCategoria("");
   }, [refetch]);
 
   const handleProductClick = (productoId: string) => {

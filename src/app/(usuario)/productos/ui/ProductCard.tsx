@@ -73,12 +73,6 @@ const ProductCard = ({ producto, user, onPress, className = "" }: Props) => {
                 Agotado
               </Badge>
             )}
-
-            {producto.es_compra_bodega && (
-              <Badge variant="outline" className="text-xs bg-blue-50">
-                Bodega
-              </Badge>
-            )}
           </div>
         </div>
       </CardHeader>
