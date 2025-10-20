@@ -15,6 +15,7 @@ import {
 import { useState } from "react";
 import { Finca } from "@/api/fincas/interfaces/response-fincasByPropietario.interface";
 import MapIframe from "@/components/generics/MapIframe";
+import { formatDate } from "@/helpers/funciones/formatDate";
 
 interface CardFincasProps {
   finca: Finca;
@@ -23,15 +24,6 @@ interface CardFincasProps {
 
 export const CardFincas = ({ finca, onPress }: CardFincasProps) => {
   const [isPressed, setIsPressed] = useState(false);
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("es-HN", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  };
 
   const getStatusText = (isActive: boolean) => {
     return isActive ? "Activa" : "Inactiva";

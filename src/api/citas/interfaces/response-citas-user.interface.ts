@@ -7,7 +7,7 @@ export interface Cita {
   id: string;
   horaInicio: string;
   horaFin: string;
-  fecha: Date;
+  fecha: string;
   estado: string;
   totalPagar: string;
   medico: Medico;

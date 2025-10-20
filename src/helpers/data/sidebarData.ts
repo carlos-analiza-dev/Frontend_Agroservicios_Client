@@ -6,12 +6,14 @@ import {
   UserCog,
   FlaskConical,
   ShoppingBag,
+  Package,
 } from "lucide-react";
 
 export const navItems = [
   { name: "Servicios", href: "/servicios", icon: BriefcaseMedical },
   { name: "Productos", href: "/productos", icon: ShoppingBag },
   { name: "Citas", href: "/citas", icon: FileText },
+  { name: "Pedidos", href: "/pedidos", icon: Package },
   { name: "Fincas", href: "/fincas", icon: Building2 },
   { name: "Animales", href: "/animales", icon: Layers3 },
   { name: "Producción", href: "/produccion", icon: FlaskConical },

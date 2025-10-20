@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { useAuthStore } from "@/providers/store/useAuthStore";
 import { Cita } from "@/api/citas/interfaces/response-citas-user.interface";
 import { Calendar, Clock, MapPin, PawPrint, User } from "lucide-react";
+import { formatDate } from "@/helpers/funciones/formatDate";
 
 interface Props {
   item: Cita;
@@ -30,16 +31,6 @@ const CardCitas = ({ item, onPress }: Props) => {
       default:
         return "bg-gray-100 text-gray-800 border-gray-200";
     }
-  };
-
-  const formatDate = (dateString: Date) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("es-ES", {
-      weekday: "short",
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
   };
 
   const formatTime = (timeString: string) => {

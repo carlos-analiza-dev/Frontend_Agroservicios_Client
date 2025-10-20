@@ -6,5 +6,6 @@ export const useFincasPropietarios = (userId: string, name?: string) => {
     queryKey: ["fincas-propietario", userId, name],
     queryFn: () => ObtenerFincasByPropietario(userId, name),
     retry: 0,
+    staleTime: 60 * 1000 * 5,
   });
 };

@@ -37,6 +37,7 @@ const useAnimalesByPropietario = (
     },
     initialPageParam: 0,
     retry: 0,
+    staleTime: 60 * 1000 * 5,
   });
 };
 
