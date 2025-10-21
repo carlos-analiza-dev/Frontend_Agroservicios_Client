@@ -12,13 +12,17 @@ import {
 import { toast } from "react-toastify";
 import { Loader2, ShoppingCart } from "lucide-react";
 import CardCarrito from "./ui/CardCarrito";
-import ResumenPedido from "./ui/ResumenPedido";
+import ResumenPedido, { UbicacionPedido } from "./ui/ResumenPedido";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
+import { useFincasPropietarios } from "@/hooks/fincas/useFincasPropietarios";
+import { useState } from "react";
+import SeleccionUbicacion from "./ui/SeleccionaUbicacion";
 
 const CarritoPage = () => {
   const router = useRouter();
   const { cliente } = useAuthStore();
+  const clienteId = cliente?.id || "";
   const {
     cart,
     removeFromCart,
@@ -28,6 +32,13 @@ const CarritoPage = () => {
     totalItems,
     totalPrice,
   } = useCartStore();
+  const { data: fincas } = useFincasPropietarios(clienteId);
+
+  const [ubicacionSeleccionada, setUbicacionSeleccionada] =
+    useState<UbicacionPedido | null>(null);
+  const [mostrarSeleccionUbicacion, setMostrarSeleccionUbicacion] =
+    useState(false);
+
   const queryClient = useQueryClient();
   const crearPedidoMutation = useMutation({
     mutationFn: async (pedidosData: CrearPedidoInterface[]) => {
@@ -36,9 +47,7 @@ const CarritoPage = () => {
     },
     onSuccess: () => {
       clearCart();
-
       queryClient.invalidateQueries({ queryKey: ["pedidos-cliente"] });
-
       toast.success("¡Pedido realizado con éxito!");
       router.push("/pedidos");
     },
@@ -57,7 +66,7 @@ const CarritoPage = () => {
     router.push("/productos");
   };
 
-  const handleCheckout = () => {
+  const handleCheckout = (ubicacion: UbicacionPedido) => {
     if (!cliente) {
       toast.error("Debes iniciar sesión para realizar un pedido");
       router.push("/auth/login");
@@ -66,6 +75,11 @@ const CarritoPage = () => {
 
     if (cart.length === 0) {
       toast.error("El carrito está vacío");
+      return;
+    }
+
+    if (!ubicacion) {
+      toast.error("Debes seleccionar una ubicación de entrega");
       return;
     }
 
@@ -99,10 +113,12 @@ const CarritoPage = () => {
         };
       });
 
-      const totalPedido = detalles.reduce(
+      const subtotalPedido = detalles.reduce(
         (sum, detalle) => sum + detalle.total,
         0
       );
+
+      const totalPedido = subtotalPedido + (ubicacion.costoDelivery || 0);
 
       const pedidoData: CrearPedidoInterface = {
         id_cliente: cliente.id,
@@ -113,12 +129,24 @@ const CarritoPage = () => {
         total: totalPedido,
         estado: EstadoPedido.PENDIENTE,
         detalles: detalles,
+        direccion_entrega: ubicacion.direccion_entrega,
+        latitud: ubicacion.latitud,
+        longitud: ubicacion.longitud,
+        tipo_entrega: ubicacion.tipoEntrega,
+        costo_delivery: ubicacion.costoDelivery || 0,
+        nombre_finca: ubicacion.nombre_finca,
       };
 
       return pedidoData;
     });
 
     crearPedidoMutation.mutate(pedidosData);
+  };
+
+  const handleUbicacionSeleccionada = (ubicacion: UbicacionPedido) => {
+    setUbicacionSeleccionada(ubicacion);
+    setMostrarSeleccionUbicacion(false);
+    toast.success("Ubicación de entrega configurada");
   };
 
   if (cart.length === 0) {
@@ -169,9 +197,35 @@ const CarritoPage = () => {
             handleCheckout={handleCheckout}
             handleContinueShopping={handleContinueShopping}
             isProcessing={crearPedidoMutation.isPending}
+            ubicacionSeleccionada={ubicacionSeleccionada}
+            onSeleccionarUbicacion={() => setMostrarSeleccionUbicacion(true)}
           />
         </div>
       </div>
+
+      {mostrarSeleccionUbicacion && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <CardHeader>
+              <CardTitle>Selecciona Ubicación de Entrega</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <SeleccionUbicacion
+                fincas={fincas?.data.fincas || []}
+                onUbicacionSeleccionada={handleUbicacionSeleccionada}
+                cliente={cliente}
+              />
+              <Button
+                variant="outline"
+                onClick={() => setMostrarSeleccionUbicacion(false)}
+                className="w-full mt-4"
+              >
+                Cancelar
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {crearPedidoMutation.isPending && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
