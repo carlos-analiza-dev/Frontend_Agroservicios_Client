@@ -2,6 +2,7 @@ import { EditarPedido } from "@/api/pedidos/accions/editar-pedido";
 import {
   CrearPedidoInterface,
   EstadoPedido,
+  TipoEntrega,
 } from "@/api/pedidos/interface/crear-pedido.interface";
 import { Pedido } from "@/api/pedidos/interface/response-pedidos.interface";
 import {
@@ -102,6 +103,7 @@ const PedidoCard = ({ pedido, cliente }: Props) => {
                 {formatDate(pedido.created_at)}
               </CardDescription>
             </div>
+
             <div className="text-right">
               <div className="text-2xl font-bold text-green-600">
                 {formatCurrency(pedido.total, simbolo)}
@@ -175,6 +177,16 @@ const PedidoCard = ({ pedido, cliente }: Props) => {
                     {formatCurrency(pedido.total, simbolo)}
                   </span>
                 </div>
+                {pedido.tipo_entrega === TipoEntrega.DELIVERY && (
+                  <div className="flex justify-between items-center mt-2">
+                    <span className="text-sm text-gray-600">
+                      Delivery (Incluido en el total)
+                    </span>
+                    <span className="text-lg font-bold text-green-600">
+                      {formatCurrency(pedido.costo_delivery, simbolo)}
+                    </span>
+                  </div>
+                )}
                 <div className="flex justify-between items-center mt-2">
                   <span className="text-sm text-gray-600">Total</span>
                   <span className="text-lg font-bold text-green-600">

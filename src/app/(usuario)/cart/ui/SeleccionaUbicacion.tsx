@@ -190,7 +190,7 @@ const SeleccionUbicacion = ({
   const [buscandoDireccion, setBuscandoDireccion] = useState(false);
   const [cargandoUbicacion, setCargandoUbicacion] = useState(false);
 
-  const costoDelivery = 5.0;
+  const costoDelivery = cliente?.pais.simbolo_moneda === "$" ? 5.0 : 100.0;
 
   const handleLocationSelect = (lat: number, lng: number) => {
     setLatitudPersonalizada(lat.toString());

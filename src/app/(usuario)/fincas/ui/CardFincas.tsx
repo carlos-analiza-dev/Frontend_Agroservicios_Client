@@ -10,12 +10,11 @@ import {
   CircleX,
   PawPrint,
   Activity,
-  Navigation,
 } from "lucide-react";
 import { useState } from "react";
 import { Finca } from "@/api/fincas/interfaces/response-fincasByPropietario.interface";
-import MapIframe from "@/components/generics/MapIframe";
 import { formatDate } from "@/helpers/funciones/formatDate";
+import GoogleMapViewer from "@/components/generics/GoogleMapViewer";
 
 interface CardFincasProps {
   finca: Finca;
@@ -31,13 +30,6 @@ export const CardFincas = ({ finca, onPress }: CardFincasProps) => {
 
   const handleMouseDown = () => setIsPressed(true);
   const handleMouseUp = () => setIsPressed(false);
-
-  const openGoogleMaps = () => {
-    if (finca.latitud && finca.longitud) {
-      const url = `https://www.google.com/maps/dir/?api=1&destination=${finca.latitud},${finca.longitud}&travelmode=driving`;
-      window.open(url, "_blank");
-    }
-  };
 
   return (
     <div className="mb-4 mx-2">
@@ -129,39 +121,21 @@ export const CardFincas = ({ finca, onPress }: CardFincasProps) => {
         </Card>
       </div>
 
-      <div className="flex items-center justify-between mt-4 mb-2">
-        <h3 className="text-lg font-semibold">
+      <div className="mt-4">
+        <h3 className="text-lg font-semibold mb-2">
           Ubicación - {finca.nombre_finca}
         </h3>
-        <button
-          onClick={openGoogleMaps}
-          className="flex items-center text-sm text-primary hover:underline"
-          title="Abrir en Google Maps"
-        >
-          <Navigation className="h-4 w-4 mr-1" />
-          Cómo llegar
-        </button>
-      </div>
 
-      {finca.latitud && finca.longitud && (
-        <div className="h-48 w-full rounded-md overflow-hidden border">
-          <MapIframe
-            lat={finca.latitud}
-            lng={finca.longitud}
-            className="h-full w-full"
-          />
-          <div className="bg-background/80 p-2 text-center text-xs text-muted-foreground">
-            <a
-              href={`https://www.google.com/maps/dir/?api=1&destination=${finca.latitud},${finca.longitud}&travelmode=driving`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary hover:underline"
-            >
-              Abrir en Google Maps para direcciones
-            </a>
-          </div>
-        </div>
-      )}
+        <GoogleMapViewer
+          latitud={finca.latitud}
+          longitud={finca.longitud}
+          titulo={finca.nombre_finca}
+          direccion={finca.ubicacion}
+          height="h-64"
+          showDirectionsButton={true}
+          className="w-full rounded-lg border"
+        />
+      </div>
     </div>
   );
 };
