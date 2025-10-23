@@ -10,6 +10,7 @@ export interface ResponseSubServicios {
 export interface PreciosPorPai {
   id: string;
   precio: number;
+  costo: number;
   tiempo: number;
   cantidadMin: number;
   cantidadMax: number;

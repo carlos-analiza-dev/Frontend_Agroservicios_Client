@@ -162,7 +162,7 @@ const AgregarCitaServicioPage = () => {
 
         if (precioPais) {
           const duracionTotal = precioPais.tiempo;
-          const precioTotal = Number(precioPais.precio);
+          const precioTotal = Number(precioPais.costo);
 
           setValue("duracion", duracionTotal);
           setValue("totalPagar", precioTotal);
@@ -192,7 +192,10 @@ const AgregarCitaServicioPage = () => {
             }))
           );
         } else {
-          console.warn("No se encontró precio configurado para este país");
+          setValue("duracion", 0);
+          setValue("totalPagar", 0);
+          setDuracion(0);
+          setFilteredHours([]);
         }
       }
     }
@@ -204,6 +207,17 @@ const AgregarCitaServicioPage = () => {
     cantidadAnimales,
     setValue,
   ]);
+
+  useEffect(() => {
+    if (!subServicioId) {
+      setValue("duracion", 0);
+      setValue("totalPagar", 0);
+      setDuracion(0);
+      setFilteredHours([]);
+      setValue("horaInicio", "");
+      setValue("horaFin", "");
+    }
+  }, [subServicioId, setValue]);
 
   const handleHoraChange = (horaInicioSeleccionada: string) => {
     const duracionServicio = watch("duracion") || 0;
@@ -264,6 +278,17 @@ const AgregarCitaServicioPage = () => {
 
   const onSubmit = (data: CrearCitaInterface) => {
     mutation.mutate({ ...data, clienteId: clienteId });
+  };
+
+  const handleServicioChange = (value: string) => {
+    setValue("subServicioId", value);
+    setValue("medicoId", "");
+    setValue("duracion", 0);
+    setValue("totalPagar", 0);
+    setDuracion(0);
+    setFilteredHours([]);
+    setValue("horaInicio", "");
+    setValue("horaFin", "");
   };
 
   const allFincas =
@@ -415,9 +440,7 @@ const AgregarCitaServicioPage = () => {
                   <div className="space-y-2">
                     <Label htmlFor="subServicioId">Servicio específico</Label>
                     <Select
-                      onValueChange={(value) =>
-                        setValue("subServicioId", value)
-                      }
+                      onValueChange={handleServicioChange}
                       value={watch("subServicioId")}
                     >
                       <SelectTrigger>

@@ -11,9 +11,9 @@ import { toast } from "react-toastify";
 interface Props {
   item: CartItem;
   cliente: Cliente | undefined;
-  removeFromCart: (productoId: string) => void;
-  decreaseQuantity: (productoId: string) => void;
-  increaseQuantity: (productoId: string) => void;
+  removeFromCart: (productoId: string, sucursalId: string) => void;
+  decreaseQuantity: (productoId: string, sucursalId: string) => void;
+  increaseQuantity: (productoId: string, sucursalId: string) => void;
 }
 
 const CardCarrito = ({
@@ -38,7 +38,7 @@ const CardCarrito = ({
   };
 
   const handleRemoveCart = (item: CartItem) => {
-    removeFromCart(item.id);
+    removeFromCart(item.id, item.sucursalId);
     toast.success("Producto eliminado del carrito");
   };
 
@@ -86,7 +86,7 @@ const CardCarrito = ({
                 <Button
                   variant="outline"
                   size="icon"
-                  onClick={() => decreaseQuantity(item.id)}
+                  onClick={() => decreaseQuantity(item.id, item.sucursalId)}
                   disabled={item.quantity <= 1}
                   className="h-8 w-8"
                 >
@@ -100,7 +100,7 @@ const CardCarrito = ({
                 <Button
                   variant="outline"
                   size="icon"
-                  onClick={() => increaseQuantity(item.id)}
+                  onClick={() => increaseQuantity(item.id, item.sucursalId)}
                   className="h-8 w-8"
                 >
                   <Plus className="h-3 w-3" />

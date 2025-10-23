@@ -21,6 +21,7 @@ import ProduccionForrajesCard from "./ProduccionForrajesCard";
 import ProduccionAgricolaCard from "./ProduccionAgricolaCard";
 import ProduccionApiculturaCard from "./ProduccionApiculturaCard";
 import ProduccionAlternativaCard from "./ProduccionAlternativaCard";
+import Link from "next/link";
 
 interface ProduccionGanaderaCardProps {
   produccion: ObtenerProduccionByUserInterface;
@@ -48,22 +49,34 @@ const ProduccionList: React.FC<ProduccionGanaderaCardProps> = ({
   return (
     <Card className="w-full max-w-4xl mx-auto mb-4 shadow-sm border-l-4 border-l-primary hover:shadow-lg transition-all duration-200">
       <CardHeader className="pb-3">
-        <div className="flex items-center gap-2">
-          <Tractor className="h-5 w-5 text-primary" />
-          <CardTitle className="text-xl font-bold text-foreground">
-            {finca.nombre_finca}
-          </CardTitle>
-        </div>
+        <div className="flex justify-between items-center">
+          <div>
+            <div className="flex items-center gap-2">
+              <Tractor className="h-5 w-5 text-primary" />
+              <CardTitle className="text-xl font-bold text-foreground">
+                {finca.nombre_finca}
+              </CardTitle>
+            </div>
 
-        <div className="flex flex-wrap gap-2 mt-2">
-          <Badge variant="secondary" className="flex items-center gap-1">
-            <Beef className="h-3 w-3" />
-            <span>{finca.cantidad_animales} animales</span>
-          </Badge>
-          <Badge variant="secondary" className="flex items-center gap-1">
-            <MapPin className="h-3 w-3" />
-            <span>{finca.area_ganaderia_hectarea} ha</span>
-          </Badge>
+            <div className="flex flex-wrap gap-2 mt-2">
+              <Badge variant="secondary" className="flex items-center gap-1">
+                <Beef className="h-3 w-3" />
+                <span>{finca.cantidad_animales} animales</span>
+              </Badge>
+              <Badge variant="secondary" className="flex items-center gap-1">
+                <MapPin className="h-3 w-3" />
+                <span>{finca.area_ganaderia_hectarea} ha</span>
+              </Badge>
+            </div>
+          </div>
+          <div>
+            <Link
+              className="hover:underline hover:text-blue-600"
+              href={`/produccion/${produccion.id}`}
+            >
+              Ver
+            </Link>
+          </div>
         </div>
       </CardHeader>
 

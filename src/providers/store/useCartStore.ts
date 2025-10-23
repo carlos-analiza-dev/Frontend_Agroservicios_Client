@@ -1,10 +1,11 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { Producto } from "@/api/productos/interfaces/response-productos-disponibles.interface";
+import { toast } from "react-toastify";
 
 export interface CartItem extends Producto {
   quantity: number;
-  sucursalId?: string;
+  sucursalId: string;
   nombreSucursal?: string;
   nota?: string;
   notas?: string;
@@ -13,33 +14,50 @@ export interface CartItem extends Producto {
 
 interface CartState {
   cart: CartItem[];
+  currentSucursalId: string | null;
   addToCart: (
     producto: Producto,
-    sucursalId?: string,
+    sucursalId: string,
     nombreSucursal?: string,
     nota?: string
   ) => void;
-  removeFromCart: (productoId: string) => void;
-  increaseQuantity: (productoId: string) => void;
-  decreaseQuantity: (productoId: string) => void;
+  removeFromCart: (productoId: string, sucursalId: string) => void;
+  increaseQuantity: (productoId: string, sucursalId: string) => void;
+  decreaseQuantity: (productoId: string, sucursalId: string) => void;
   clearCart: () => void;
   totalItems: () => number;
   totalPrice: () => number;
+  getItemQuantity: (productoId: string, sucursalId: string) => number;
+  setCurrentSucursal: (sucursalId: string | null) => void;
+  getCurrentSucursal: () => string | null;
+  canAddToSucursal: (sucursalId: string) => boolean;
 }
 
 export const useCartStore = create<CartState>()(
   persist(
     (set, get) => ({
       cart: [],
+      currentSucursalId: null,
 
       addToCart: (producto, sucursalId, nombreSucursal, nota) => {
+        const state = get();
+
+        if (!state.canAddToSucursal(sucursalId)) {
+          return false;
+        }
+
         set((state) => {
-          const exists = state.cart.find((item) => item.id === producto.id);
+          const newSucursalId =
+            state.cart.length === 0 ? sucursalId : state.currentSucursalId;
+
+          const exists = state.cart.find(
+            (item) => item.id === producto.id && item.sucursalId === sucursalId
+          );
 
           if (exists) {
             return {
               cart: state.cart.map((item) =>
-                item.id === producto.id
+                item.id === producto.id && item.sucursalId === sucursalId
                   ? {
                       ...item,
                       quantity: item.quantity + 1,
@@ -49,6 +67,7 @@ export const useCartStore = create<CartState>()(
                     }
                   : item
               ),
+              currentSucursalId: newSucursalId,
             };
           }
 
@@ -66,20 +85,32 @@ export const useCartStore = create<CartState>()(
                 ),
               },
             ],
+            currentSucursalId: newSucursalId,
           };
         });
       },
 
-      removeFromCart: (productoId) => {
-        set((state) => ({
-          cart: state.cart.filter((item) => item.id !== productoId),
-        }));
+      removeFromCart: (productoId, sucursalId) => {
+        set((state) => {
+          const newCart = state.cart.filter(
+            (item) =>
+              !(item.id === productoId && item.sucursalId === sucursalId)
+          );
+
+          const newSucursalId =
+            newCart.length === 0 ? null : state.currentSucursalId;
+
+          return {
+            cart: newCart,
+            currentSucursalId: newSucursalId,
+          };
+        });
       },
 
-      increaseQuantity: (productoId) => {
+      increaseQuantity: (productoId, sucursalId) => {
         set((state) => ({
           cart: state.cart.map((item) =>
-            item.id === productoId
+            item.id === productoId && item.sucursalId === sucursalId
               ? {
                   ...item,
                   quantity: item.quantity + 1,
@@ -92,11 +123,13 @@ export const useCartStore = create<CartState>()(
         }));
       },
 
-      decreaseQuantity: (productoId) => {
+      decreaseQuantity: (productoId, sucursalId) => {
         set((state) => ({
           cart: state.cart
             .map((item) =>
-              item.id === productoId && item.quantity > 1
+              item.id === productoId &&
+              item.sucursalId === sucursalId &&
+              item.quantity > 1
                 ? {
                     ...item,
                     quantity: item.quantity - 1,
@@ -110,7 +143,7 @@ export const useCartStore = create<CartState>()(
         }));
       },
 
-      clearCart: () => set({ cart: [] }),
+      clearCart: () => set({ cart: [], currentSucursalId: null }),
 
       totalItems: () => {
         return get().cart.length;
@@ -124,10 +157,36 @@ export const useCartStore = create<CartState>()(
           0
         );
       },
+
+      getItemQuantity: (productoId, sucursalId) => {
+        const item = get().cart.find(
+          (item) => item.id === productoId && item.sucursalId === sucursalId
+        );
+        return item ? item.quantity : 0;
+      },
+
+      setCurrentSucursal: (sucursalId) => {
+        set({ currentSucursalId: sucursalId });
+      },
+
+      getCurrentSucursal: () => {
+        return get().currentSucursalId;
+      },
+
+      canAddToSucursal: (sucursalId) => {
+        const state = get();
+
+        return (
+          state.cart.length === 0 || state.currentSucursalId === sucursalId
+        );
+      },
     }),
     {
       name: "cart-storage",
-      partialize: (state) => ({ cart: state.cart }),
+      partialize: (state) => ({
+        cart: state.cart,
+        currentSucursalId: state.currentSucursalId,
+      }),
     }
   )
 );

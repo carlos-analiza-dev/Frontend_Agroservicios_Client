@@ -10,7 +10,7 @@ import {
   CrearPedidoInterface,
 } from "@/api/pedidos/interface/crear-pedido.interface";
 import { toast } from "react-toastify";
-import { Loader2, ShoppingCart } from "lucide-react";
+import { ArrowLeft, Loader2, ShoppingCart } from "lucide-react";
 import CardCarrito from "./ui/CardCarrito";
 import ResumenPedido, { UbicacionPedido } from "./ui/ResumenPedido";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -168,6 +168,12 @@ const CarritoPage = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <div className="flex items-center justify-between mb-6">
+        <Button variant="ghost" onClick={() => router.back()} className="gap-2">
+          <ArrowLeft className="h-4 w-4" />
+          Volver
+        </Button>
+      </div>
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Carrito de Compras</h1>
         <p className="text-gray-600 mt-2">

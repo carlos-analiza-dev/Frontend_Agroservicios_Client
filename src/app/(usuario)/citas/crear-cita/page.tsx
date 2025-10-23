@@ -172,7 +172,10 @@ const CrearCitaPage = () => {
             }))
           );
         } else {
-          console.warn("No se encontró precio configurado para este país");
+          setValue("duracion", 0);
+          setValue("totalPagar", 0);
+          setDuracion(0);
+          setFilteredHours([]);
         }
       }
     }
@@ -184,6 +187,28 @@ const CrearCitaPage = () => {
     cantidadAnimales,
     setValue,
   ]);
+
+  useEffect(() => {
+    if (!subServicioId) {
+      setValue("duracion", 0);
+      setValue("totalPagar", 0);
+      setDuracion(0);
+      setFilteredHours([]);
+      setValue("horaInicio", "");
+      setValue("horaFin", "");
+    }
+  }, [subServicioId, setValue]);
+
+  const handleServicioChange = (value: string) => {
+    setValue("subServicioId", value);
+    setValue("medicoId", "");
+    setValue("duracion", 0);
+    setValue("totalPagar", 0);
+    setDuracion(0);
+    setFilteredHours([]);
+    setValue("horaInicio", "");
+    setValue("horaFin", "");
+  };
 
   const handleHoraChange = (horaInicioSeleccionada: string) => {
     const duracionServicio = watch("duracion") || 0;
@@ -313,7 +338,6 @@ const CrearCitaPage = () => {
           </CardHeader>
           <CardContent className="p-6">
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              {/* Información General */}
               <div className="space-y-4">
                 <h3 className="text-lg font-medium text-gray-900 flex items-center gap-2">
                   <Building className="h-5 w-5" />
@@ -340,7 +364,6 @@ const CrearCitaPage = () => {
                 </div>
               </div>
 
-              {/* Datos del Animal */}
               <div className="space-y-4">
                 <h3 className="text-lg font-medium text-gray-900 flex items-center gap-2">
                   <PawPrint className="h-5 w-5" />
@@ -407,17 +430,20 @@ const CrearCitaPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="categoria">Tipo de Servicio</Label>
-                    <Select onValueChange={setCategoriaId} value={categoriaId}>
+                    <Select
+                      onValueChange={handleServicioChange}
+                      value={watch("subServicioId")}
+                    >
                       <SelectTrigger>
-                        <SelectValue placeholder="Selecciona el tipo de servicio" />
+                        <SelectValue placeholder="Selecciona el servicio" />
                       </SelectTrigger>
                       <SelectContent>
-                        {allCategorias.map((categoria) => (
+                        {allServicios.map((servicio) => (
                           <SelectItem
-                            key={categoria.value}
-                            value={categoria.value}
+                            key={servicio.value}
+                            value={servicio.value}
                           >
-                            {categoria.label}
+                            {servicio.label}
                           </SelectItem>
                         ))}
                       </SelectContent>

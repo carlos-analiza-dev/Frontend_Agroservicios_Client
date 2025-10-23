@@ -18,6 +18,7 @@ import { Cliente } from "@/interfaces/auth/cliente";
 import { useCartStore } from "@/providers/store/useCartStore";
 import {
   AlertCircle,
+  AlertTriangle,
   CheckCircle2,
   Heart,
   Minus,
@@ -25,6 +26,7 @@ import {
   ShoppingCart,
   Store,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import React, { Dispatch, SetStateAction } from "react";
 import { toast } from "react-toastify";
 
@@ -75,12 +77,36 @@ const DetailsProducto = ({
   isFavorite,
   handleToggleFavorite,
 }: Props) => {
-  const { addToCart, cart } = useCartStore();
+  const router = useRouter();
+  const {
+    addToCart,
+    cart,
+    canAddToSucursal,
+    getCurrentSucursal,
+    currentSucursalId,
+  } = useCartStore();
 
-  const isInCart = cart.some((item) => item.id === producto.id);
+  const isInCart = cart.some(
+    (item) => item.id === producto.id && item.sucursalId === sucursalId
+  );
 
+  const canAddToCurrentSucursal = canAddToSucursal(sucursalId);
+  const currentSucursal = getCurrentSucursal();
+
+  const getCurrentSucursalName = () => {
+    if (!currentSucursal) return "";
+    const item = cart.find((item) => item.sucursalId === currentSucursal);
+    return item?.nombreSucursal || "";
+  };
   const handleAddToCart = () => {
     if (!isAvailable || !sucursalId) return;
+
+    if (!canAddToCurrentSucursal) {
+      toast.error(
+        `No puedes agregar productos de ${nombreSucursal}. Tu pedido actual es para ${getCurrentSucursalName()}. Limpia el carrito para cambiar de sucursal.`
+      );
+      return;
+    }
 
     for (let i = 0; i < quantity; i++) {
       addToCart(producto, sucursalId, nombreSucursal, notas);
@@ -93,6 +119,8 @@ const DetailsProducto = ({
     setNotas("");
     setQuantity(1);
   };
+  const isSucursalDisabled =
+    currentSucursal !== null && currentSucursal !== sucursalId;
 
   return (
     <div className="space-y-6">
@@ -104,6 +132,27 @@ const DetailsProducto = ({
           {producto.descripcion || "Sin descripción disponible"}
         </p>
       </div>
+
+      {isSucursalDisabled && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="h-5 w-5 text-yellow-600" />
+            <span className="text-yellow-800 font-medium">
+              Pedido en curso para {getCurrentSucursalName()}
+            </span>
+          </div>
+          <p className="text-yellow-700 text-sm mt-1">
+            No puedes agregar productos de otras sucursales.
+            <Button
+              variant="link"
+              className="p-0 h-auto text-yellow-800 font-semibold ml-1"
+              onClick={() => router.push("/cart")}
+            >
+              Ver carrito
+            </Button>
+          </p>
+        </div>
+      )}
 
       <Card>
         <CardContent className="p-4 space-y-4">
@@ -282,7 +331,7 @@ const DetailsProducto = ({
             </Button>
 
             <Button
-              disabled={!isAvailable || !sucursalId}
+              disabled={!isAvailable || !sucursalId || !canAddToCurrentSucursal}
               className="flex-1"
               size="lg"
               onClick={handleAddToCart}
@@ -290,11 +339,20 @@ const DetailsProducto = ({
               <ShoppingCart className="h-5 w-5 mr-2" />
               {!sucursalId
                 ? "Selecciona una sucursal"
-                : isInCart
-                  ? "Agregar más al carrito"
-                  : "Agregar al carrito"}
+                : !canAddToCurrentSucursal
+                  ? `Pedido para ${getCurrentSucursalName()}`
+                  : isInCart
+                    ? "Agregar más al carrito"
+                    : "Agregar al carrito"}
             </Button>
           </div>
+
+          {!canAddToCurrentSucursal && (
+            <p className="text-sm text-yellow-600 mt-2 flex items-center gap-1">
+              <AlertTriangle className="h-4 w-4" />
+              Limpia el carrito para pedir de esta sucursal
+            </p>
+          )}
         </CardContent>
       </Card>
 
