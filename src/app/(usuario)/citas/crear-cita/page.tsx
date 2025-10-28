@@ -88,6 +88,11 @@ const CrearCitaPage = () => {
     setCantidadAnimales(animalesIds.length);
   }, [watch("animalesId")]);
 
+  useEffect(() => {
+    setValue("subServicioId", "");
+    setValue("medicoId", "");
+  }, [categoriaId, setValue]);
+
   const { data: especies } = useGetEspecies();
   const { data: razas } = useGetRazasByEspecie(especieId);
   const { data: fincas } = useFincasPropietarios(userId);
@@ -98,6 +103,7 @@ const CrearCitaPage = () => {
     razaId
   );
   const { data: categorias } = useGetServiciosActivos();
+
   const { data: servicios } = useGetSubServiciosByServicioId(categoriaId);
   const subServicioId = watch("subServicioId");
   const { data: medicos } = userGetMedicoByEspecialidadesByPais(
@@ -144,7 +150,7 @@ const CrearCitaPage = () => {
 
         if (precioPais) {
           const duracionTotal = precioPais.tiempo;
-          const precioTotal = Number(precioPais.precio);
+          const precioTotal = Number(precioPais.costo);
 
           setValue("duracion", duracionTotal);
           setValue("totalPagar", precioTotal);
@@ -199,7 +205,19 @@ const CrearCitaPage = () => {
     }
   }, [subServicioId, setValue]);
 
-  const handleServicioChange = (value: string) => {
+  const handleCategoriaChange = (value: string) => {
+    setCategoriaId(value);
+    setValue("subServicioId", "");
+    setValue("medicoId", "");
+    setValue("duracion", 0);
+    setValue("totalPagar", 0);
+    setDuracion(0);
+    setFilteredHours([]);
+    setValue("horaInicio", "");
+    setValue("horaFin", "");
+  };
+
+  const handleSubServicioChange = (value: string) => {
     setValue("subServicioId", value);
     setValue("medicoId", "");
     setValue("duracion", 0);
@@ -431,19 +449,19 @@ const CrearCitaPage = () => {
                   <div className="space-y-2">
                     <Label htmlFor="categoria">Tipo de Servicio</Label>
                     <Select
-                      onValueChange={handleServicioChange}
-                      value={watch("subServicioId")}
+                      onValueChange={handleCategoriaChange}
+                      value={categoriaId}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Selecciona el servicio" />
+                        <SelectValue placeholder="Selecciona el tipo de servicio" />
                       </SelectTrigger>
                       <SelectContent>
-                        {allServicios.map((servicio) => (
+                        {allCategorias.map((categoria) => (
                           <SelectItem
-                            key={servicio.value}
-                            value={servicio.value}
+                            key={categoria.value}
+                            value={categoria.value}
                           >
-                            {servicio.label}
+                            {categoria.label}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -453,14 +471,12 @@ const CrearCitaPage = () => {
                   <div className="space-y-2">
                     <Label htmlFor="subServicioId">Servicio específico</Label>
                     <Select
-                      onValueChange={(value) =>
-                        setValue("subServicioId", value)
-                      }
+                      onValueChange={handleSubServicioChange}
                       value={watch("subServicioId")}
                       disabled={!categoriaId}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Selecciona el servicio" />
+                        <SelectValue placeholder="Selecciona el servicio específico" />
                       </SelectTrigger>
                       <SelectContent>
                         {allServicios.map((servicio) => (
@@ -474,7 +490,6 @@ const CrearCitaPage = () => {
                       </SelectContent>
                     </Select>
                   </div>
-
                   <div className="space-y-2">
                     <Label htmlFor="medicoId">Veterinario</Label>
                     <Select

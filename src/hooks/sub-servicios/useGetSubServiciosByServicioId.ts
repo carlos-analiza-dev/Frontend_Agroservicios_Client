@@ -5,6 +5,7 @@ const useGetSubServiciosByServicioId = (servicioId: string) => {
   return useQuery({
     queryKey: ["sub-servicios", servicioId],
     queryFn: () => ObtenerSubServiciosByServicioId(servicioId),
+    enabled: !!servicioId,
     retry: 0,
   });
 };

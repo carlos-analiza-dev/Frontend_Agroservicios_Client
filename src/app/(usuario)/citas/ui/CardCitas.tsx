@@ -47,7 +47,7 @@ const CardCitas = ({ item, onPress }: Props) => {
           <div className="flex items-center space-x-2 flex-1 min-w-0">
             <PawPrint className="h-5 w-5 text-blue-500 flex-shrink-0" />
             <h3 className="font-semibold text-lg truncate">
-              {item.subServicio.nombre}
+              {item.subServicio.nombre} - {item.codigo}
             </h3>
           </div>
           <Badge variant="outline" className={getStatusColor()}>
