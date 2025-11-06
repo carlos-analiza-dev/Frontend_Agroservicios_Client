@@ -3,15 +3,18 @@
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Activity, DollarSign } from "lucide-react";
+import { Activity, DollarSign, Pencil } from "lucide-react";
 import { Alternativa } from "@/api/produccion/interface/obter-producciones-userId.interface";
+import { Button } from "@/components/ui/button";
 
 interface ProduccionAlternativaCardProps {
   alternativa: Alternativa;
+  handleProduccionAlternativa: (alternativa: Alternativa) => void;
 }
 
 const ProduccionAlternativaCard: React.FC<ProduccionAlternativaCardProps> = ({
   alternativa,
+  handleProduccionAlternativa,
 }) => {
   if (!alternativa.actividades || alternativa.actividades.length === 0) {
     return null;
@@ -24,6 +27,15 @@ const ProduccionAlternativaCard: React.FC<ProduccionAlternativaCardProps> = ({
 
   return (
     <Card className="w-full">
+      <div className="flex justify-end mt-4 p-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => handleProduccionAlternativa(alternativa)}
+        >
+          <Pencil className="h-4 w-4 mr-1" /> Editar Agricola
+        </Button>
+      </div>
       <CardContent className="p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">

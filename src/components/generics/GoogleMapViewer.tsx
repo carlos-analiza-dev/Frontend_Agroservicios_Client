@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Loader2, MapPin, Navigation } from "lucide-react";
+import { toast } from "react-toastify";
 
 declare global {
   interface Window {
@@ -51,7 +52,8 @@ const GoogleMapViewer = ({
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
     if (!apiKey) {
-      console.error("Google Maps API key no encontrada");
+      toast.error("Google Maps API key no encontrada");
+
       setLoadError(true);
       return;
     }
@@ -156,7 +158,8 @@ const GoogleMapViewer = ({
         infoWindow.open(mapInstanceRef.current, markerRef.current);
       }, 1000);
     } catch (error) {
-      console.error("Error al inicializar el mapa:", error);
+      toast.error("Error al inicializar el mapa");
+
       setLoadError(true);
     }
   }, [mapLoaded, latitud, longitud, titulo, direccion]);

@@ -7,7 +7,6 @@ export const uploadProfileImageAnimal = async (
   const url = `${process.env.NEXT_PUBLIC_API_URL}/images-aminales/upload/${animalId}`;
 
   try {
-    // Convertir Data URL a Blob directamente
     const base64Response = await fetch(imageDataUrl);
     const blob = await base64Response.blob();
 
@@ -22,7 +21,6 @@ export const uploadProfileImageAnimal = async (
 
     return response.data;
   } catch (error) {
-    console.error("Error uploading profile image:", error);
     throw new Error("No se pudo subir la imagen de perfil");
   }
 };

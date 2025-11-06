@@ -3,11 +3,13 @@ import { ResponsePedidosInterface } from "../interface/response-pedidos.interfac
 
 export const ObtenerPedidosByCliente = async (
   limit: number = 10,
-  offset: number = 0
+  offset: number = 0,
+  estado: string = ""
 ) => {
   const params: Record<string, string> = {
     limit: limit.toString(),
     offset: offset.toString(),
+    estado: estado.toString(),
   };
 
   const queryString = new URLSearchParams(params).toString();

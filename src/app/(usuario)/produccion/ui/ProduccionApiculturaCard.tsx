@@ -3,20 +3,35 @@
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Bug, Scale } from "lucide-react";
-import { ObtenerProduccionByUserInterface } from "@/api/produccion/interface/obter-producciones-userId.interface";
+import { Bug, Pencil, Scale } from "lucide-react";
+import {
+  Apicultura,
+  ObtenerProduccionByUserInterface,
+} from "@/api/produccion/interface/obter-producciones-userId.interface";
+import { Button } from "@/components/ui/button";
 
 interface ProduccionApiculturaCardProps {
   apicultura: ObtenerProduccionByUserInterface["apicultura"];
+  handleProduccionApicultura: (apicultura: Apicultura) => void;
 }
 
 const ProduccionApiculturaCard: React.FC<ProduccionApiculturaCardProps> = ({
   apicultura,
+  handleProduccionApicultura,
 }) => {
   if (!apicultura) return null;
 
   return (
     <Card className="w-full">
+      <div className="flex justify-end mt-4 p-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => handleProduccionApicultura(apicultura)}
+        >
+          <Pencil className="h-4 w-4 mr-1" /> Editar Apicultura
+        </Button>
+      </div>
       <CardContent className="p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">

@@ -3,18 +3,24 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Sprout } from "lucide-react";
-import { Cultivo } from "@/api/produccion/interface/obter-producciones-userId.interface";
+import { Pencil, Sprout } from "lucide-react";
+import {
+  Agricola,
+  Cultivo,
+} from "@/api/produccion/interface/obter-producciones-userId.interface";
+import { Button } from "@/components/ui/button";
 
 interface ProduccionAgricolaProps {
   agricola: {
     id: string;
     cultivos: Cultivo[];
   };
+  handleProduccionAgricola: (agricola: Agricola) => void;
 }
 
 export const ProduccionAgricolaCard: React.FC<ProduccionAgricolaProps> = ({
   agricola,
+  handleProduccionAgricola,
 }) => {
   if (!agricola.cultivos || agricola.cultivos.length === 0) {
     return null;
@@ -22,6 +28,15 @@ export const ProduccionAgricolaCard: React.FC<ProduccionAgricolaProps> = ({
 
   return (
     <Card className="w-full">
+      <div className="flex justify-end mt-4 p-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => handleProduccionAgricola(agricola)}
+        >
+          <Pencil className="h-4 w-4 mr-1" /> Editar Agricola
+        </Button>
+      </div>
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-lg">
           <Sprout className="h-5 w-5 text-primary" />

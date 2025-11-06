@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { TipoEntrega } from "@/api/pedidos/interface/crear-pedido.interface";
 import { Cliente } from "@/interfaces/auth/cliente";
+import { toast } from "react-toastify";
 
 declare global {
   interface Window {
@@ -84,7 +85,8 @@ const GoogleMapsWrapper = ({
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
     if (!apiKey) {
-      console.error("Google Maps API key no encontrada");
+      toast.error("Google Maps API key no encontrada");
+
       setLoadError(true);
       return;
     }
@@ -214,7 +216,7 @@ const SeleccionUbicacion = ({
         }
       );
     } catch (error) {
-      console.error("Error en geocodificación inversa:", error);
+      toast.error("Ocurrio un error");
     }
   };
 
@@ -247,14 +249,14 @@ const SeleccionUbicacion = ({
       );
     } catch (error) {
       setBuscandoDireccion(false);
-      console.error("Error al buscar dirección:", error);
-      alert("Error al buscar la dirección.");
+      toast.error("Error al buscar dirección");
     }
   };
 
   const obtenerUbicacionActual = () => {
     if (!navigator.geolocation) {
-      alert("La geolocalización no es compatible con este navegador");
+      toast.warn("La geolocalización no es compatible con este navegador");
+
       return;
     }
 

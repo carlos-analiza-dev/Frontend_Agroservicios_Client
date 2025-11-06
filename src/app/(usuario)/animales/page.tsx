@@ -22,6 +22,7 @@ import { Buscador } from "@/components/generics/Buscador";
 import { FAB } from "@/components/generics/FAB";
 import AnimalCard from "./ui/AnimalCard";
 import { uploadProfileImageAnimal } from "@/api/animales_profile/accions/uploadProfileImageAnimal";
+import { toast } from "react-toastify";
 
 const AnimalesPageGanadero = () => {
   const router = useRouter();
@@ -68,7 +69,7 @@ const AnimalesPageGanadero = () => {
       await uploadProfileImageAnimal(imageUri, animalId);
       queryClient.invalidateQueries({ queryKey: ["animales-propietario"] });
     } catch (error) {
-      console.error("Error updating profile image:", error);
+      toast.error("Error al actualizar la imagen de perfil");
     }
   };
 

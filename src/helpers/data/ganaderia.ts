@@ -1,0 +1,28 @@
+import { Ganadera } from "@/api/produccion/interface/obter-producciones-userId.interface";
+
+export const ganaderaDefault: Ganadera = {
+  id: "",
+  tiposProduccion: [],
+  produccionLecheCantidad: 0,
+  produccionLecheUnidad: undefined,
+  vacasOrdeño: 0,
+  vacasSecas: 0,
+  terneros: 0,
+  fechaPromedioSecado: "",
+  cabezasEngordeBovino: null,
+  kilosSacrificioBovino: null,
+  cerdosEngorde: null,
+  pesoPromedioCerdo: null,
+  mortalidadLoteAves: null,
+  huevosPorDia: null,
+  gallinasPonedoras: null,
+  calidadHuevo: undefined,
+  animalesEngordeCaprino: null,
+  pesoPromedioCaprino: null,
+  edadSacrificioCaprino: null,
+  animalesDisponibles: null,
+  pesoPromedioCabeza: null,
+  otroProductoNombre: undefined,
+  otroProductoUnidadMedida: undefined,
+  otroProductoProduccionMensual: null,
+};

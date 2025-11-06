@@ -2,22 +2,38 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Users, Beef } from "lucide-react";
-import { ObtenerProduccionByUserInterface } from "@/api/produccion/interface/obter-producciones-userId.interface";
+import { MapPin, Users, Beef, Pencil } from "lucide-react";
+import {
+  Ganadera,
+  ObtenerProduccionByUserInterface,
+} from "@/api/produccion/interface/obter-producciones-userId.interface";
+import { Button } from "@/components/ui/button";
+import { ProduccionGanadera } from "@/api/produccion/interface/crear-produccion-finca.interface";
 
 interface ProduccionGanaderaCardProps {
   ganadera: ObtenerProduccionByUserInterface["ganadera"];
   finca: ObtenerProduccionByUserInterface["finca"];
+  handleProduccionGanadera: (ganadera: Ganadera) => void;
 }
 
 const ProduccionGanaderaCard: React.FC<ProduccionGanaderaCardProps> = ({
   ganadera,
   finca,
+  handleProduccionGanadera,
 }) => {
   if (!ganadera) return null;
 
   return (
     <Card className="w-full">
+      <div className="flex justify-end mt-4 p-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => handleProduccionGanadera(ganadera)}
+        >
+          <Pencil className="h-4 w-4 mr-1" /> Editar Ganaderia
+        </Button>
+      </div>
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-lg">
           <Beef className="h-5 w-5 text-primary" />

@@ -5,9 +5,10 @@ import { Button } from "@/components/ui/button";
 
 import { ShoppingCart, AlertCircle } from "lucide-react";
 import { useAuthStore } from "@/providers/store/useAuthStore";
-import PedidoCard from "./ui/PedidoCard";
-import PedidosSkeleton from "./ui/PedidosSkeleton";
-import { PedidosPagination } from "./ui/PedidosPagination";
+import { EstadoPedido } from "@/api/pedidos/interface/crear-pedido.interface";
+import PedidosSkeleton from "@/components/pedidos/PedidosSkeleton";
+import PedidoCard from "@/components/pedidos/PedidoCard";
+import { PedidosPagination } from "@/components/pedidos/PedidosPagination";
 
 const ITEMS_PER_PAGE = 5;
 
@@ -19,7 +20,11 @@ const PedidosPage = () => {
     data: pedidosData,
     isLoading,
     error,
-  } = useGetPedidosCliente(ITEMS_PER_PAGE, (currentPage - 1) * ITEMS_PER_PAGE);
+  } = useGetPedidosCliente(
+    ITEMS_PER_PAGE,
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    EstadoPedido.PENDIENTE
+  );
 
   const totalPages = Math.ceil((pedidosData?.total || 0) / ITEMS_PER_PAGE);
 

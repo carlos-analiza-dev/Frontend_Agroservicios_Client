@@ -75,7 +75,7 @@ export default function MapaSeleccionDireccion({
           setIsLoading(false);
         },
         (error) => {
-          console.error("Error obteniendo ubicación:", error);
+          toast.error("Error obteniendo ubicación");
 
           setMarker(defaultCoords);
           updateDireccion(defaultCoords.latitude, defaultCoords.longitude);
@@ -111,7 +111,8 @@ export default function MapaSeleccionDireccion({
         );
       }
     } catch (error) {
-      console.error("Error al obtener la dirección:", error);
+      toast.error("Error al obtener la dirección");
+
       setDireccion(
         `Ubicación seleccionada (${latitude.toFixed(4)}, ${longitude.toFixed(4)})`
       );

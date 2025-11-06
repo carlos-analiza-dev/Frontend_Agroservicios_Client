@@ -36,3 +36,18 @@ export const ObtenerAnimalesByPropietario = async (
   const response = await veterinariaAPI.get<ResponseAnimalesByPropietario>(url);
   return response.data;
 };
+
+export const ObtenerAnimales = async (
+  propietarioId: string
+): Promise<ResponseAnimalesByPropietario> => {
+  let url = `${process.env.NEXT_PUBLIC_API_URL}/animal-finca/propietario-animales/${propietarioId}`;
+
+  const params = new URLSearchParams();
+
+  if ([...params].length > 0) {
+    url += `?${params.toString()}`;
+  }
+
+  const response = await veterinariaAPI.get<ResponseAnimalesByPropietario>(url);
+  return response.data;
+};

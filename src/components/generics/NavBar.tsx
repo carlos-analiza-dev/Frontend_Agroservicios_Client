@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { Button } from "../ui/button";
 import { Heart, LogOut, Menu, ShoppingCart, User } from "lucide-react";
@@ -32,7 +34,9 @@ const NavBar = ({ handleLogout, setMobileSidebarOpen }: Props) => {
   const cantidadCarrito = totalItems();
 
   const activePage =
-    navItems.find((item) => item.href === pathname)?.name || "";
+    navItems
+      .flatMap((section) => section.items)
+      .find((item) => item.href === pathname)?.name || "";
 
   return (
     <header className="flex h-16 items-center justify-between border-b border-gray-200 bg-white px-6">

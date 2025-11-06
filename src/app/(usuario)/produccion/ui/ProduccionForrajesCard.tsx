@@ -4,15 +4,26 @@ import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Sprout, Calendar, Clock, Scale, Wheat, Leaf } from "lucide-react";
+import {
+  Sprout,
+  Calendar,
+  Clock,
+  Scale,
+  Wheat,
+  Leaf,
+  Pencil,
+} from "lucide-react";
 import { ForrajesInsumo } from "@/api/produccion/interface/obter-producciones-userId.interface";
+import { Button } from "@/components/ui/button";
 
 interface ProduccionForrajesCardProps {
   forrajesInsumo: ForrajesInsumo;
+  handleProduccionForrajes: (forraje: ForrajesInsumo) => void;
 }
 
 const ProduccionForrajesCard: React.FC<ProduccionForrajesCardProps> = ({
   forrajesInsumo,
+  handleProduccionForrajes,
 }) => {
   const getInsumoIcon = (tipo: string) => {
     switch (tipo) {
@@ -52,6 +63,15 @@ const ProduccionForrajesCard: React.FC<ProduccionForrajesCardProps> = ({
 
   return (
     <Card className="w-full">
+      <div className="flex justify-end mt-4 p-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => handleProduccionForrajes(forrajesInsumo)}
+        >
+          <Pencil className="h-4 w-4 mr-1" /> Editar Forraje
+        </Button>
+      </div>
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-lg">
           <Leaf className="h-5 w-5 text-primary" />

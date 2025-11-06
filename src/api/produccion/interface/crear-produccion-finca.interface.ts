@@ -60,7 +60,7 @@ export interface ProduccionGanadera {
 
   cerdosEngorde?: number;
   pesoPromedioCerdo?: number;
-  edadSacrificioProcino?: string;
+  edadSacrificioProcino?: number;
 
   mortalidadLoteAves?: number;
 
@@ -70,7 +70,7 @@ export interface ProduccionGanadera {
 
   animalesEngordeCaprino?: number;
   pesoPromedioCaprino?: number;
-  edadSacrificioCaprino?: string;
+  edadSacrificioCaprino?: number;
 
   animalesDisponibles?: number;
   pesoPromedioCabeza?: number;

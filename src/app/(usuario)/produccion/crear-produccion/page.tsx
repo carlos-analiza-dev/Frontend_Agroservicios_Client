@@ -118,7 +118,9 @@ const CrearProduccionPage = () => {
   });
 
   const onSubmit = (data: CreateProduccionFinca) => {
-    mutate_produccion.mutate({ ...data, userId: userId });
+    const dataUpdate = { ...data, userId: userId };
+
+    mutate_produccion.mutate(dataUpdate);
   };
 
   const renderSection = () => {

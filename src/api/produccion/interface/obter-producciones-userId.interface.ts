@@ -1,3 +1,11 @@
+import {
+  CalidadHuevo,
+  CultivoTipo,
+  InsumoTipo,
+  TipoProduccionGanadera,
+  UnidadProduccionLeche,
+} from "./crear-produccion-finca.interface";
+
 export interface ObtenerProduccionByUserInterface {
   id: string;
   produccion_mixta: boolean;
@@ -19,12 +27,12 @@ export interface Agricola {
 }
 
 export interface Cultivo {
-  tipo: string;
+  tipo: CultivoTipo;
   estacionalidad: string;
+  descripcion?: string;
   metodo_cultivo?: string;
   meses_produccion: string[];
   tiempo_estimado_cultivo: string;
-  area_cultivada_hectareas: number;
   cantidad_producida_hectareas: string;
 }
 
@@ -38,14 +46,13 @@ export interface Actividade {
   unidad_medida?: string;
   ingresos_anuales: number;
   cantidad_producida: string;
-  descripcion?: string;
 }
 
 export interface Apicultura {
   id: string;
   numero_colmenas: number;
   frecuencia_cosecha: string;
-  cantidad_por_cosecha: string;
+  cantidad_por_cosecha: number;
   calidad_miel: string;
 }
 
@@ -80,23 +87,25 @@ export interface ForrajesInsumo {
 }
 
 export interface Insumo {
-  tipo: string;
+  id: string;
+  tipo: InsumoTipo;
   tipo_heno?: string;
   estacionalidad_heno?: string;
   meses_produccion_heno?: string[];
   produccion_manzana?: string;
   tiempo_estimado_cultivo?: string;
+  descripcion_otro?: string;
 }
 
 export interface Ganadera {
-  id: string;
-  tiposProduccion: string[];
-  produccionLecheCantidad: string;
-  produccionLecheUnidad: string;
+  id?: string;
+  tiposProduccion: TipoProduccionGanadera[];
+  produccionLecheCantidad?: number;
+  produccionLecheUnidad: UnidadProduccionLeche | undefined;
   vacasOrdeño: number;
   vacasSecas: number;
   terneros: number;
-  fechaPromedioSecado: Date;
+  fechaPromedioSecado: string;
   cabezasEngordeBovino: number | null;
   kilosSacrificioBovino: null | string;
   cerdosEngorde: number | null;
@@ -104,14 +113,14 @@ export interface Ganadera {
   mortalidadLoteAves: number | null;
   huevosPorDia: number | null;
   gallinasPonedoras: number | null;
-  calidadHuevo: string | null;
+  calidadHuevo: CalidadHuevo | undefined;
   animalesEngordeCaprino: number | null;
   pesoPromedioCaprino: number | null;
   edadSacrificioCaprino: number | null;
   animalesDisponibles: number | null;
   pesoPromedioCabeza: number | null;
-  otroProductoNombre: null | string;
-  otroProductoUnidadMedida: null | string;
+  otroProductoNombre: undefined | string;
+  otroProductoUnidadMedida: undefined | string;
   otroProductoProduccionMensual: null | string;
 }
 
