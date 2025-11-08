@@ -1,6 +1,7 @@
 import {
   BriefcaseMedical,
   Building2,
+  ChartColumnIncreasing,
   FileText,
   FlaskConical,
   Heart,
@@ -10,14 +11,15 @@ import {
   PackageOpen,
   PackageXIcon,
   Pill,
-  Scale,
-  Shield,
   ShoppingBag,
   UserCog,
-  Users,
 } from "lucide-react";
 
 export const navItems = [
+  {
+    category: "Panel",
+    items: [{ name: "Panel", href: "/panel", icon: ChartColumnIncreasing }],
+  },
   {
     category: "Actividades",
     items: [
@@ -47,7 +49,7 @@ export const navItems = [
     category: "Salud Animal",
     items: [
       { name: "Historial Médico", href: "/historial-medico", icon: Heart },
-      { name: "Vacunación", href: "/vacunacion", icon: Shield },
+
       { name: "Tratamientos", href: "/tratamientos", icon: Pill },
     ],
   },

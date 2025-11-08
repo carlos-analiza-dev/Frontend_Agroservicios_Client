@@ -63,7 +63,7 @@ const LoginForm = () => {
       }
 
       toast.success("¡Inicio de sesión exitoso!");
-      router.push("/servicios");
+      router.push("/panel");
     } catch (error) {
       if (isAxiosError(error)) {
         if (error.response?.status === 401) {
