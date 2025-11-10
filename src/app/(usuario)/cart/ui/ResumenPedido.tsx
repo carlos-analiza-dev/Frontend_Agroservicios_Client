@@ -3,8 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Cliente } from "@/interfaces/auth/cliente";
-import { Loader2, MapPin, Truck, Store } from "lucide-react";
+import { Loader2, MapPin, Truck, Store, Info } from "lucide-react";
 import React from "react";
+import { useCartStore } from "@/providers/store/useCartStore";
 
 interface UbicacionPedido {
   tipo: "finca" | "sucursal" | "otra";
@@ -38,9 +39,12 @@ const ResumenPedido = ({
   ubicacionSeleccionada,
   onSeleccionarUbicacion,
 }: Props) => {
-  const precioSubtotal = totalPrice();
+  const { calcularImpuestos } = useCartStore();
+  const impuestos = calcularImpuestos();
+
   const costoDelivery = ubicacionSeleccionada?.costoDelivery || 0;
-  const precioTotal = precioSubtotal + costoDelivery;
+
+  const precioTotal = impuestos.total_general + costoDelivery;
 
   const obtenerTextoUbicacion = () => {
     if (!ubicacionSeleccionada) return "No seleccionada";
@@ -118,20 +122,90 @@ const ResumenPedido = ({
 
         <Separator />
 
-        <div className="space-y-2">
+        <div className="space-y-3">
           <div className="flex justify-between">
-            <span className="text-gray-600">Productos ({totalItems()}):</span>
+            <span className="text-gray-600">Subtotal:</span>
             <span className="font-semibold">
               {cliente?.pais?.simbolo_moneda || "$"}
-              {precioSubtotal.toFixed(2)}
+              {impuestos.sub_total.toFixed(2)}
             </span>
           </div>
+
+          {impuestos.importe_exento > 0 && (
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-600">Exento:</span>
+              <span className="text-green-600">
+                -{cliente?.pais?.simbolo_moneda || "$"}
+                {impuestos.importe_exento.toFixed(2)}
+              </span>
+            </div>
+          )}
+
+          {impuestos.importe_exonerado > 0 && (
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-600">Exonerado:</span>
+              <span className="text-green-600">
+                -{cliente?.pais?.simbolo_moneda || "$"}
+                {impuestos.importe_exonerado.toFixed(2)}
+              </span>
+            </div>
+          )}
+
+          {impuestos.importe_gravado_15 > 0 && (
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-600">Base 15%:</span>
+              <span>
+                {cliente?.pais?.simbolo_moneda || "$"}
+                {impuestos.importe_gravado_15.toFixed(2)}
+              </span>
+            </div>
+          )}
+
+          {impuestos.isv_15 > 0 && (
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-600">ISV 15%:</span>
+              <span className="text-red-600">
+                +{cliente?.pais?.simbolo_moneda || "$"}
+                {impuestos.isv_15.toFixed(2)}
+              </span>
+            </div>
+          )}
+
+          {impuestos.importe_gravado_18 > 0 && (
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-600">Base 18%:</span>
+              <span>
+                {cliente?.pais?.simbolo_moneda || "$"}
+                {impuestos.importe_gravado_18.toFixed(2)}
+              </span>
+            </div>
+          )}
+
+          {impuestos.isv_18 > 0 && (
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-600">ISV 18%:</span>
+              <span className="text-red-600">
+                +{cliente?.pais?.simbolo_moneda || "$"}
+                {impuestos.isv_18.toFixed(2)}
+              </span>
+            </div>
+          )}
+
+          {impuestos.total_impuestos > 0 && (
+            <div className="flex justify-between text-sm font-medium pt-1 border-t">
+              <span className="text-gray-700">Total Impuestos:</span>
+              <span className="text-red-600">
+                +{cliente?.pais?.simbolo_moneda || "$"}
+                {impuestos.total_impuestos.toFixed(2)}
+              </span>
+            </div>
+          )}
 
           {costoDelivery > 0 && (
             <div className="flex justify-between">
               <span className="text-gray-600">Costo de delivery:</span>
               <span className="font-semibold text-orange-600">
-                {cliente?.pais?.simbolo_moneda || "$"}
+                +{cliente?.pais?.simbolo_moneda || "$"}
                 {costoDelivery.toFixed(2)}
               </span>
             </div>
@@ -146,6 +220,13 @@ const ResumenPedido = ({
               {precioTotal.toFixed(2)}
             </span>
           </div>
+
+          {impuestos.total_impuestos > 0 && (
+            <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
+              <Info className="h-3 w-3" />
+              <span>Impuestos incluidos en el total</span>
+            </div>
+          )}
         </div>
 
         <Button

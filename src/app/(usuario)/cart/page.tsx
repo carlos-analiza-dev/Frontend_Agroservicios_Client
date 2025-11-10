@@ -102,23 +102,25 @@ const CarritoPage = () => {
       >
     );
 
-    const pedidosData = Object.values(itemsPorSucursal).map((grupoSucursal) => {
-      const detalles = grupoSucursal.items.map((item) => {
-        const precio = parseFloat(item.preciosPorPais?.[0]?.precio || "0");
-        return {
-          id_producto: item.id,
-          cantidad: item.quantity,
-          precio: precio,
-          total: precio * item.quantity,
-        };
-      });
+    // Obtener los detalles procesados UNA SOLA VEZ
+    const { detalles: todosLosDetalles, totales } = useCartStore
+      .getState()
+      .procesarDetallesCarrito();
 
-      const subtotalPedido = detalles.reduce(
+    const pedidosData = Object.values(itemsPorSucursal).map((grupoSucursal) => {
+      // Filtrar detalles para esta sucursal específica
+      const detallesSucursal = todosLosDetalles.filter((detalle) =>
+        grupoSucursal.items.some((item) => item.id === detalle.id_producto)
+      );
+
+      // Calcular subtotal para esta sucursal
+      const subtotalSucursal = detallesSucursal.reduce(
         (sum, detalle) => sum + detalle.total,
         0
       );
 
-      const totalPedido = subtotalPedido + (ubicacion.costoDelivery || 0);
+      // Calcular impuestos proporcionales para esta sucursal
+      const proporcion = subtotalSucursal / (totales.subTotal || 1); // Evitar división por cero
 
       const pedidoData: CrearPedidoInterface = {
         id_cliente: cliente.id,
@@ -126,9 +128,31 @@ const CarritoPage = () => {
           grupoSucursal.sucursalId === "default"
             ? undefined
             : grupoSucursal.sucursalId,
-        total: totalPedido,
+        sub_total: subtotalSucursal,
+        importe_exento: Number(
+          (
+            totales.subTotal -
+            (totales.importeGravado15 + totales.importeGravado18) * proporcion
+          ).toFixed(2)
+        ),
+        importe_exonerado: 0,
+        importe_gravado_15: Number(
+          (totales.importeGravado15 * proporcion).toFixed(2)
+        ),
+        importe_gravado_18: Number(
+          (totales.importeGravado18 * proporcion).toFixed(2)
+        ),
+        isv_15: Number((totales.isv15 * proporcion).toFixed(2)),
+        isv_18: Number((totales.isv18 * proporcion).toFixed(2)),
+        total: Number(
+          (
+            subtotalSucursal +
+            (totales.isv15 + totales.isv18) * proporcion +
+            (ubicacion.costoDelivery || 0)
+          ).toFixed(2)
+        ),
         estado: EstadoPedido.PENDIENTE,
-        detalles: detalles,
+        detalles: detallesSucursal,
         direccion_entrega: ubicacion.direccion_entrega,
         latitud: ubicacion.latitud,
         longitud: ubicacion.longitud,
@@ -142,7 +166,6 @@ const CarritoPage = () => {
 
     crearPedidoMutation.mutate(pedidosData);
   };
-
   const handleUbicacionSeleccionada = (ubicacion: UbicacionPedido) => {
     setUbicacionSeleccionada(ubicacion);
     setMostrarSeleccionUbicacion(false);

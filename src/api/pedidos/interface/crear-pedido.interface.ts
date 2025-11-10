@@ -13,6 +13,13 @@ export enum TipoEntrega {
 export interface CrearPedidoInterface {
   id_cliente: string;
   id_sucursal?: string;
+  sub_total: number;
+  importe_exento?: number;
+  importe_exonerado?: number;
+  importe_gravado_15?: number;
+  importe_gravado_18?: number;
+  isv_15?: number;
+  isv_18?: number;
   total: number;
   estado: EstadoPedido;
   detalles: Detalle[];

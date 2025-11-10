@@ -5,7 +5,7 @@ import {
 } from "./crear-produccion-finca.interface";
 
 export interface ProduccionGanaderaInterface {
-  produccionFincaId: string;
+  produccionFincaId?: string;
   tiposProduccion?: TipoProduccionGanadera[];
 
   produccionLecheCantidad?: number;
