@@ -9,18 +9,21 @@ import NavBar from "@/components/generics/NavBar";
 import { FullScreenLoader } from "@/components/generics/FullScreenLoader";
 import { useFavoritos } from "@/hooks/favoritos/useFavoritos";
 import { useCartStore } from "@/providers/store/useCartStore";
+import { isTokenExpired } from "@/helpers/funciones/tokenExpired";
+import { SessionExpiredModal } from "@/components/generics/SessionExpiredModal";
 
 export default function AdminLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { logout, cliente } = useAuthStore();
+  const { logout, cliente, token } = useAuthStore();
   const { limpiarFavoritos } = useFavoritos();
   const { clearCart } = useCartStore();
   const router = useRouter();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showSessionModal, setShowSessionModal] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -40,16 +43,54 @@ export default function AdminLayout({
     }
   };
 
+  const checkTokenExpiration = () => {
+    if (token && isTokenExpired(token)) {
+      setShowSessionModal(true);
+      return true;
+    }
+    return false;
+  };
+
+  const handleSessionExpired = async () => {
+    setShowSessionModal(false);
+    setLoading(true);
+
+    try {
+      await logout();
+      toast.info("Tu sesión ha expirado. Por favor, inicia sesión nuevamente.");
+      router.push("/");
+    } catch (error) {
+      toast.error("Error al cerrar sesión expirada");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     const checkUser = async () => {
-      if (!cliente) {
-        await logout();
-        router.push("/");
+      if (checkTokenExpiration()) {
+        return;
       }
     };
 
     checkUser();
   }, [cliente, logout, router]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (token) {
+        checkTokenExpiration();
+      }
+    }, 60000);
+
+    return () => clearInterval(interval);
+  }, [token]);
+
+  useEffect(() => {
+    if (token) {
+      checkTokenExpiration();
+    }
+  }, [token]);
 
   if (loading) {
     return <FullScreenLoader />;
@@ -75,6 +116,11 @@ export default function AdminLayout({
           <div className="h-full">{children}</div>
         </main>
       </div>
+
+      <SessionExpiredModal
+        isOpen={showSessionModal}
+        onClose={handleSessionExpired}
+      />
     </div>
   );
 }
