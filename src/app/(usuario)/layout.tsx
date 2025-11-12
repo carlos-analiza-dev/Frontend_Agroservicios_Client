@@ -68,6 +68,12 @@ export default function AdminLayout({
 
   useEffect(() => {
     const checkUser = async () => {
+      if (!token) {
+        toast.warning("Por favor, inicia sesión para continuar.");
+        router.push("/");
+        return;
+      }
+
       if (checkTokenExpiration()) {
         return;
       }
