@@ -16,14 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Calendar } from "@/components/ui/calendar";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  CalendarIcon,
   Loader2,
   PawPrint,
   Clock,
@@ -32,8 +25,6 @@ import {
   Building,
   Stethoscope,
 } from "lucide-react";
-import { format } from "date-fns";
-import { es } from "date-fns/locale";
 import { useAuthStore } from "@/providers/store/useAuthStore";
 import { toast } from "react-toastify";
 import useGetAnimalesByFincaEspRaza from "@/hooks/animales/useGetAnimalesByFincaEspRaza";
@@ -70,8 +61,6 @@ const CrearCitaPage = () => {
   const [filteredHours, setFilteredHours] = useState<HoraDisponibleItem[]>([]);
   const [duracion, setDuracion] = useState(1);
   const [cantidadAnimales, setCantidadAnimales] = useState(0);
-  const [date, setDate] = useState<Date>();
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -81,6 +70,7 @@ const CrearCitaPage = () => {
     watch,
     handleSubmit,
     formState: { errors },
+    register,
   } = useForm<CrearCitaInterface>();
 
   useEffect(() => {
@@ -287,6 +277,11 @@ const CrearCitaPage = () => {
 
   const onSubmit = (data: CrearCitaInterface) => {
     mutation.mutate({ ...data, clienteId: userId });
+  };
+
+  const getMinDate = () => {
+    const today = new Date();
+    return today.toISOString().split("T")[0];
   };
 
   const allFincas =
@@ -514,47 +509,26 @@ const CrearCitaPage = () => {
 
               <div className="space-y-4">
                 <h3 className="text-lg font-medium text-gray-900 flex items-center gap-2">
-                  <CalendarIcon className="h-5 w-5" />
+                  <Clock className="h-5 w-5" />
                   Fecha y Horario
                 </h3>
 
                 <div className="space-y-2">
                   <Label htmlFor="fecha">Fecha de la cita</Label>
-                  <Popover
-                    open={isCalendarOpen}
-                    onOpenChange={setIsCalendarOpen}
-                  >
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className="w-full justify-start text-left font-normal"
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {date
-                          ? format(date, "PPP", { locale: es })
-                          : "Selecciona una fecha"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar
-                        mode="single"
-                        selected={date}
-                        onSelect={(selectedDate) => {
-                          setDate(selectedDate);
-                          if (selectedDate) {
-                            const formatted = format(
-                              selectedDate,
-                              "yyyy-MM-dd"
-                            );
-                            setValue("fecha", formatted);
-                          }
-                          setIsCalendarOpen(false);
-                        }}
-                        disabled={(date) => date < new Date()}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
+                  <Input
+                    id="fecha"
+                    type="date"
+                    min={getMinDate()}
+                    {...register("fecha", {
+                      required: "La fecha es requerida",
+                    })}
+                    className="w-full"
+                  />
+                  {errors.fecha && (
+                    <p className="text-red-500 text-sm mt-1">
+                      {errors.fecha.message}
+                    </p>
+                  )}
                 </div>
 
                 {filteredHours && filteredHours.length > 0 ? (
@@ -577,7 +551,7 @@ const CrearCitaPage = () => {
                         {filteredHours.map((hora) => (
                           <SelectItem key={hora.value} value={hora.value}>
                             {hora.label} (Duración: {Math.floor(duracion / 60)}h{" "}
-                            {duracion % 60}m)
+                            {duracion % 60}h)
                           </SelectItem>
                         ))}
                       </SelectContent>

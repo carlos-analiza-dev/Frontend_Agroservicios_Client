@@ -57,7 +57,7 @@ export default function AdminLayout({
 
     try {
       await logout();
-      toast.info("Tu sesión ha expirado. Por favor, inicia sesión nuevamente.");
+
       router.push("/");
     } catch (error) {
       toast.error("Error al cerrar sesión expirada");
@@ -69,7 +69,6 @@ export default function AdminLayout({
   useEffect(() => {
     const checkUser = async () => {
       if (!token) {
-        toast.warning("Por favor, inicia sesión para continuar.");
         router.push("/");
         return;
       }

@@ -241,7 +241,7 @@ const SeleccionUbicacion = ({
             setLongitudPersonalizada(lng.toString());
             setDireccionPersonalizada(results[0].formatted_address);
           } else {
-            alert(
+            toast.warning(
               "No se pudo encontrar la dirección. Intenta con una descripción más específica."
             );
           }
@@ -273,24 +273,24 @@ const SeleccionUbicacion = ({
       },
       (error) => {
         setCargandoUbicacion(false);
-        alert("Error al obtener la ubicación: " + error.message);
+        toast.warning("Error al obtener la ubicación: " + error.message);
       }
     );
   };
 
   const handleConfirmar = () => {
     if (tipoUbicacion === "finca" && !fincaSeleccionada) {
-      alert("Por favor selecciona una finca");
+      toast.warning("Por favor selecciona una finca");
       return;
     }
 
     if (tipoUbicacion === "otra") {
       if (!direccionPersonalizada.trim()) {
-        alert("Por favor ingresa una dirección");
+        toast.warning("Por favor ingresa una dirección");
         return;
       }
       if (!latitudPersonalizada || !longitudPersonalizada) {
-        alert("Por favor selecciona una ubicación en el mapa");
+        toast.warning("Por favor selecciona una ubicación en el mapa");
         return;
       }
     }

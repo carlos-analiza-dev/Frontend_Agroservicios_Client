@@ -33,7 +33,7 @@ const ProduccionAlternativaCard: React.FC<ProduccionAlternativaCardProps> = ({
           size="sm"
           onClick={() => handleProduccionAlternativa(alternativa)}
         >
-          <Pencil className="h-4 w-4 mr-1" /> Editar Agricola
+          <Pencil className="h-4 w-4 mr-1" /> Editar Alternativa
         </Button>
       </div>
       <CardContent className="p-4">

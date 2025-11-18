@@ -19,14 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Calendar } from "@/components/ui/calendar";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  CalendarIcon,
   Loader2,
   PawPrint,
   MapPin,
@@ -35,8 +28,6 @@ import {
   Stethoscope,
   ArrowLeft,
 } from "lucide-react";
-import { format } from "date-fns";
-import { es } from "date-fns/locale";
 import { useAuthStore } from "@/providers/store/useAuthStore";
 import useGetRazasByEspecie from "@/hooks/razas/useGetRazasByEspecie";
 import { useFincasPropietarios } from "@/hooks/fincas/useFincasPropietarios";
@@ -75,8 +66,6 @@ const AgregarCitaServicioPage = () => {
   const [filteredHours, setFilteredHours] = useState<HoraDisponibleItem[]>([]);
   const [duracion, setDuracion] = useState(1);
   const [cantidadAnimales, setCantidadAnimales] = useState(0);
-  const [date, setDate] = useState<Date>();
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [selectedAnimals, setSelectedAnimals] = useState<string[]>([]);
 
   const queryClient = useQueryClient();
@@ -87,6 +76,7 @@ const AgregarCitaServicioPage = () => {
     watch,
     handleSubmit,
     formState: { errors },
+    register,
   } = useForm<CrearCitaInterface>();
 
   useEffect(() => {
@@ -185,7 +175,7 @@ const AgregarCitaServicioPage = () => {
               value: hora.horaInicio,
               label: `${hora.horaInicio} - ${hora.horaFin} (${Math.floor(
                 duracionTotal / 60
-              )}h ${duracionTotal % 60}m)`,
+              )}h ${duracionTotal % 60}hrs)`,
               horaInicio: hora.horaInicio,
               horaFin: hora.horaFin,
               duracionDisponible: hora.duracionDisponible,
@@ -289,6 +279,11 @@ const AgregarCitaServicioPage = () => {
     setFilteredHours([]);
     setValue("horaInicio", "");
     setValue("horaFin", "");
+  };
+
+  const getMinDate = () => {
+    const today = new Date();
+    return today.toISOString().split("T")[0];
   };
 
   const allFincas =
@@ -481,41 +476,20 @@ const AgregarCitaServicioPage = () => {
 
                 <div className="space-y-2">
                   <Label htmlFor="fecha">Fecha de la cita</Label>
-                  <Popover
-                    open={isCalendarOpen}
-                    onOpenChange={setIsCalendarOpen}
-                  >
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className="w-full justify-start text-left font-normal"
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {date
-                          ? format(date, "PPP", { locale: es })
-                          : "Selecciona una fecha"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar
-                        mode="single"
-                        selected={date}
-                        onSelect={(selectedDate) => {
-                          setDate(selectedDate);
-                          if (selectedDate) {
-                            const formatted = format(
-                              selectedDate,
-                              "yyyy-MM-dd"
-                            );
-                            setValue("fecha", formatted);
-                          }
-                          setIsCalendarOpen(false);
-                        }}
-                        disabled={(date) => date < new Date()}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
+                  <Input
+                    id="fecha"
+                    type="date"
+                    min={getMinDate()}
+                    {...register("fecha", {
+                      required: "La fecha es requerida",
+                    })}
+                    className="w-full"
+                  />
+                  {errors.fecha && (
+                    <p className="text-red-500 text-sm mt-1">
+                      {errors.fecha.message}
+                    </p>
+                  )}
                 </div>
 
                 {filteredHours && filteredHours.length > 0 ? (

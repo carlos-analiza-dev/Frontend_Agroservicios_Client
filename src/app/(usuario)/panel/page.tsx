@@ -57,8 +57,8 @@ const PanelPageGanadero = () => {
             <TabsTrigger value="agricola" className="text-sm sm:text-base">
               Agrícola
             </TabsTrigger>
-            <TabsTrigger value="opcion3" className="text-sm sm:text-base">
-              Opción 3
+            <TabsTrigger value="produccion" className="text-sm sm:text-base">
+              Produccion
             </TabsTrigger>
           </TabsList>
 
@@ -93,11 +93,11 @@ const PanelPageGanadero = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="opcion3">
+          <TabsContent value="produccion">
             <Card className="w-full">
               <CardHeader>
                 <CardTitle className="text-lg sm:text-xl font-semibold">
-                  Opción 3
+                  Produccion
                 </CardTitle>
                 <CardDescription className="text-sm sm:text-base">
                   Configura aquí los datos adicionales del sistema.
