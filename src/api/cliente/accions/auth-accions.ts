@@ -1,5 +1,6 @@
 import { veterinariaAPI } from "@/helpers/api/veterinariaAPI";
 import {
+  ClientePermiso,
   Departamento,
   Municipio,
   Pais,
@@ -20,6 +21,7 @@ export interface AuthResponse {
   departamento: Departamento;
   municipio: Municipio;
   profileImages: ProfileImage[];
+  clientePermisos: ClientePermiso[];
   token: string;
 }
 

@@ -32,6 +32,25 @@ export interface ProfileImage {
   updatedAt: Date;
 }
 
+export interface ClientePermiso {
+  id: string;
+  ver: boolean;
+  crear: boolean;
+  editar: boolean;
+  eliminar: boolean;
+  permiso: Permiso;
+}
+
+export interface Permiso {
+  id: string;
+  nombre: string;
+  descripcion: string;
+  url: string;
+  modulo: string;
+  isActive: boolean;
+  createdAt: Date;
+}
+
 export interface Cliente {
   id: string;
   email: string;
@@ -46,6 +65,7 @@ export interface Cliente {
   departamento: Departamento;
   municipio: Municipio;
   profileImages: ProfileImage[];
+  clientePermisos: ClientePermiso[];
 }
 
 export type ClienteUpdateData = {

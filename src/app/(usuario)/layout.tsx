@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useAuthStore } from "@/providers/store/useAuthStore";
 import { toast } from "react-toastify";
 import SidebarAdmin from "@/components/generics/SidebarAdmin";
@@ -21,9 +21,38 @@ export default function AdminLayout({
   const { limpiarFavoritos } = useFavoritos();
   const { clearCart } = useCartStore();
   const router = useRouter();
+  const pathname = usePathname();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showSessionModal, setShowSessionModal] = useState(false);
+  const [checkingPermissions, setCheckingPermissions] = useState(true);
+
+  // Obtener las URLs a las que el cliente tiene permiso de "ver"
+  const permisosVer =
+    cliente?.clientePermisos
+      ?.filter((permiso) => permiso.ver === true)
+      ?.map((permiso) => permiso.permiso.url) || [];
+
+  // Verificar si la ruta actual tiene permisos
+  const hasPermissionForCurrentRoute = () => {
+    // Si no hay cliente cargado aún, esperar
+    if (!cliente) return true;
+
+    // Rutas que siempre están permitidas para todos los usuarios
+    const allowedRoutes = [
+      "/not-found",
+      "/unauthorized",
+      "/panel", // <- Agregar /panel aquí
+    ];
+
+    // Si la ruta actual está en las rutas permitidas, no redirigir
+    if (allowedRoutes.includes(pathname)) {
+      return true;
+    }
+
+    // Verificar si la ruta actual está en los permisos del cliente
+    return permisosVer.includes(pathname);
+  };
 
   const handleLogout = async () => {
     try {
@@ -97,7 +126,23 @@ export default function AdminLayout({
     }
   }, [token]);
 
-  if (loading) {
+  // Efecto para verificar permisos de la ruta actual
+  useEffect(() => {
+    const checkRoutePermissions = () => {
+      // Solo verificar si ya tenemos los datos del cliente
+      if (cliente) {
+        if (!hasPermissionForCurrentRoute()) {
+          router.push("/not-found");
+        }
+        setCheckingPermissions(false);
+      }
+    };
+
+    checkRoutePermissions();
+  }, [cliente, pathname, router]);
+
+  // Mostrar loader mientras verificamos permisos
+  if (loading || checkingPermissions) {
     return <FullScreenLoader />;
   }
 

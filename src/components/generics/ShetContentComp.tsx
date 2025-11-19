@@ -13,6 +13,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "../ui/accordion";
+import { useAuthStore } from "@/providers/store/useAuthStore";
 
 interface Props {
   setMobileSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -26,6 +27,31 @@ const SheetContentComp = ({
   mobileSidebarOpen,
 }: Props) => {
   const pathname = usePathname();
+  const { cliente } = useAuthStore();
+
+  const permisosVer =
+    cliente?.clientePermisos
+      ?.filter((permiso) => permiso.ver === true)
+      ?.map((permiso) => permiso.permiso.url) || [];
+
+  const filteredNavItems = navItems
+    .map((section) => {
+      const filteredItems = section.items.filter((item) => {
+        if (item.href === "/panel") {
+          return true;
+        }
+
+        return permisosVer.includes(item.href);
+      });
+
+      return {
+        ...section,
+        items: filteredItems,
+      };
+    })
+    .filter((section) => section.items.length > 0);
+
+  const isItemActive = (href: string) => pathname === href;
 
   return (
     <Sheet open={mobileSidebarOpen} onOpenChange={setMobileSidebarOpen}>
@@ -40,12 +66,12 @@ const SheetContentComp = ({
 
         <div className="flex flex-1 flex-col overflow-y-auto px-2 py-4">
           <Accordion type="multiple" className="space-y-2">
-            {navItems.map((section) => (
+            {filteredNavItems.map((section) => (
               <AccordionItem key={section.category} value={section.category}>
                 <AccordionTrigger>{section.category}</AccordionTrigger>
                 <AccordionContent className="space-y-1 mt-1 pl-2">
                   {section.items.map((item) => {
-                    const isActive = pathname === item.href;
+                    const isActive = isItemActive(item.href);
                     return (
                       <Link
                         key={item.name}
@@ -66,6 +92,15 @@ const SheetContentComp = ({
               </AccordionItem>
             ))}
           </Accordion>
+
+          {filteredNavItems.length === 0 && (
+            <div className="flex-1 flex items-center justify-center">
+              <div className="text-center text-gray-500">
+                <p>No tienes permisos asignados</p>
+                <p className="text-sm">Contacta al administrador</p>
+              </div>
+            </div>
+          )}
 
           <div className="mt-auto p-4 border-t border-gray-100">
             <Separator className="my-4" />
