@@ -174,7 +174,17 @@ const CarritoPage = () => {
 
   if (cart.length === 0) {
     return (
-      <div className="container mx-auto px-4 py-16 text-center">
+      <div className="container mx-auto px-4 py-8 text-center">
+        <div className="flex items-center justify-between mb-6">
+          <Button
+            variant="ghost"
+            onClick={() => router.back()}
+            className="gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Volver
+          </Button>
+        </div>
         <ShoppingCart className="h-24 w-24 text-gray-400 mx-auto mb-6" />
         <h2 className="text-2xl font-bold text-gray-900 mb-4">
           Tu carrito está vacío
@@ -182,9 +192,6 @@ const CarritoPage = () => {
         <p className="text-gray-600 mb-8">
           Agrega algunos productos para comenzar a comprar
         </p>
-        <Button onClick={handleContinueShopping} size="lg">
-          Explorar Productos
-        </Button>
       </div>
     );
   }

@@ -54,9 +54,6 @@ export default function FavoritosPage() {
             <p className="text-muted-foreground">
               No tienes productos favoritos
             </p>
-            <Button onClick={() => router.push("/productos")}>
-              Explorar Productos
-            </Button>
           </div>
         ) : (
           <>
